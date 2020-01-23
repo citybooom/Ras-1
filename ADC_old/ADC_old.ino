@@ -56,7 +56,7 @@ int16_t base3d;
 
 void setup(void) 
 {
-  Serial.begin(2000000);  
+  Serial.begin(500000);  
   ads.begin();
   pinMode(2, OUTPUT); 
   pinMode(3, OUTPUT); 
@@ -150,65 +150,42 @@ void loop(void)
   Voltage2d = ((base2d-adc2d) * 0.1875)/1000;
   Voltage3d = ((base3d-adc3d) * 0.1875)/1000;
 
-  if(Voltage0a >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage0a, 5); 
-  if(Voltage1a >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage1a, 5);
-  if(Voltage2a >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage2a, 5);
-  if(Voltage3a >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage3a, 5);
-  if(Voltage0b >= 0)
-    Serial.print("  ");
-  else
-    Serial.print(" "); 
-      
+  
+  Serial.print(Voltage0a*100, 5); 
+  Serial.print(" ");
+  Serial.print(Voltage1a*100, 5);
+  Serial.print(" ");
+  Serial.print(Voltage2a*100, 5);
+  Serial.print(" ");
+  Serial.print(Voltage3a*100, 5);
+  Serial.print("  ");  
      
-  Serial.print(Voltage0b, 5); 
-  if(Voltage1b >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage1b, 5);
-  if(Voltage2b >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage2b, 5);
-  if(Voltage3b >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage3b, 5);
-  if(Voltage0c >= 0)
-    Serial.print("  ");  
-  else
-    Serial.print(" "); 
+  Serial.print(Voltage0b*100, 5); 
+  Serial.print(" ");
+  Serial.print(Voltage1b*100, 5);
+  Serial.print(" ");
+  Serial.print(Voltage2b*100, 5);
+  Serial.print(" ");
+  Serial.print(Voltage3b*100, 5);
+  Serial.print("  ");  
        
-  Serial.print(Voltage0c, 5); 
-  if(Voltage1c >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage1c, 5);
-  if(Voltage2c >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage2c, 5);
-  if(Voltage3c >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage3c, 5);
-  if(Voltage0d >= 0)
-    Serial.print("  ");  
-  else
-    Serial.print(" "); 
+  Serial.print(Voltage0c*100, 5); 
+  Serial.print(" ");
+  Serial.print(Voltage1c*100, 5);
+  Serial.print(" ");
+  Serial.print(Voltage2c*100, 5);
+  Serial.print(" ");
+  Serial.print(Voltage3c*100, 5);
+  Serial.print("  "); 
 
        
-  Serial.print(Voltage0d, 5); 
-  if(Voltage1d >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage1d, 5);
-  if(Voltage2d >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage2d, 5);
-  if(Voltage3d >= 0)
-    Serial.print(" ");
-  Serial.print(Voltage3d, 5);
-  
+  Serial.print(Voltage0d*100, 5); 
+  Serial.print(" ");
+  Serial.print(Voltage1d*100, 5);
+  Serial.print(" ");
+  Serial.print(Voltage2d*100, 5);
+  Serial.print(" ");
+  Serial.print(Voltage3d*100, 5);
+  Serial.println(" "); 
 
 }
