@@ -237,7 +237,7 @@ while 1
                 %t1 = [t1 text((2.25-j*rad)*cos(pi*1/16+i*angle),(2.25-j*rad)*sin(pi*1/16+i*angle),num2str(prob(j*16+i)))];
                 if((prob(j*16+i)) == point)
                     set(sc,'XData',(2.25-j*rad)*cos(pi*1/16+i*angle),'YData',(2.25-j*rad)*sin(pi*1/16+i*angle));
-                    set(sc,'SizeData',point);
+                    set(sc,'sz',
                 end
             end
         end

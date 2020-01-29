@@ -28,6 +28,7 @@ while 1
     Graph4 = plot(x, buffer(4,:),x, buffer(8,:),x, buffer(12,:),x, buffer(16,:));
     axis([0 100 -30 30])
     
+    numbers(2)
     
 end
 

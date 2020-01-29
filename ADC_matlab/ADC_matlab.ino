@@ -54,6 +54,8 @@ int16_t base1d;
 int16_t base2d;
 int16_t base3d;
 
+int count = 0;
+
 void setup(void) 
 {
   Serial.begin(2000000);  
@@ -62,7 +64,7 @@ void setup(void)
   pinMode(3, OUTPUT); 
   pinMode(4, OUTPUT); 
   pinMode(5, OUTPUT);
-
+ 
   digitalWrite(2, HIGH);
   delay(1);
 
@@ -70,34 +72,41 @@ void setup(void)
   base1a = ads.readADC_SingleEnded(1);
   base2a = ads.readADC_SingleEnded(2);
   base3a = ads.readADC_SingleEnded(3);
+    
 
   digitalWrite(2, LOW);
   digitalWrite(3, HIGH);
   delay(1);
 
+  
   base0b = ads.readADC_SingleEnded(0);
   base1b = ads.readADC_SingleEnded(1);
   base2b = ads.readADC_SingleEnded(2);
   base3b = ads.readADC_SingleEnded(3);
+  
    
   digitalWrite(3, LOW);
   digitalWrite(4, HIGH);
   delay(1);
 
+  
   base0c = ads.readADC_SingleEnded(0);
   base1c = ads.readADC_SingleEnded(1);
   base2c = ads.readADC_SingleEnded(2);
   base3c = ads.readADC_SingleEnded(3);
   
+  
   digitalWrite(4, LOW);
   digitalWrite(5, HIGH);
   delay(1);
+
 
   base0d = ads.readADC_SingleEnded(0);
   base1d = ads.readADC_SingleEnded(1);
   base2d = ads.readADC_SingleEnded(2);
   base3d = ads.readADC_SingleEnded(3);
-  //Serial.print('a'); 
+  
+  
 }
 
 void loop(void) 
@@ -113,6 +122,12 @@ void loop(void)
   Voltage1a = ((base1a-adc1a) * 0.1875)/1000;
   Voltage2a = ((base2a-adc2a) * 0.1875)/1000;
   Voltage3a = ((base3a-adc3a) * 0.1875)/1000;
+  if (count < 20) {
+    base0a = adc0a;
+    base1a = adc1a;
+    base2a = adc2a;
+    base3a = adc3a;
+  }
   
   digitalWrite(2, LOW);
   digitalWrite(3, HIGH);
@@ -125,10 +140,17 @@ void loop(void)
   Voltage1b = ((base1b-adc1b) * 0.1875)/1000;
   Voltage2b = ((base2b-adc2b) * 0.1875)/1000;
   Voltage3b = ((base3b-adc3b) * 0.1875)/1000;
+  if (count < 20) {
+    base0b = adc0b;
+    base1b = adc1b;
+    base2b = adc2b;
+    base3b = adc3b;
+  }
 
   digitalWrite(3, LOW);
   digitalWrite(4, HIGH);
   delay(1);
+  
   adc0c = ads.readADC_SingleEnded(0);
   adc1c = ads.readADC_SingleEnded(1);
   adc2c = ads.readADC_SingleEnded(2);
@@ -137,6 +159,13 @@ void loop(void)
   Voltage1c = ((base1c-adc1c) * 0.1875)/1000;
   Voltage2c = ((base2c-adc2c) * 0.1875)/1000;
   Voltage3c = ((base3c-adc3c) * 0.1875)/1000;
+  if (count < 20) {
+    base0c = adc0c;
+    base1c = adc1c;
+    base2c = adc2c;
+    base3c = adc3c;
+  }
+
 
   digitalWrite(4, LOW);
   digitalWrite(5, HIGH);
@@ -149,6 +178,12 @@ void loop(void)
   Voltage1d = ((base1d-adc1d) * 0.1875)/1000;
   Voltage2d = ((base2d-adc2d) * 0.1875)/1000;
   Voltage3d = ((base3d-adc3d) * 0.1875)/1000;
+  if (count < 20) {
+    base0d = adc0d;
+    base1d = adc1d;
+    base2d = adc2d;
+    base3d = adc3d;
+  }
 
   if(Voltage0a >= 0)
   Serial.print(" ");
@@ -189,7 +224,7 @@ void loop(void)
   Serial.print(Voltage2d*100, 5);
   Serial.print(" ");
   Serial.println(Voltage3d*100, 5);
- 
-  
+
+  count = count + 1;  
 
 }

@@ -16,25 +16,25 @@ prob0a = zeros(60,1);
 [prob0a(25),prob0a(41)] = deal(10);
 [prob0a(9),prob0a(26),prob0a(42),prob0a(53)] = deal(8);
 [prob0a(10),prob0a(11),prob0a(43),prob0a(54),prob0a(27)] = deal(6);
-[prob0a(40),prob0a(24),prob0a(52),prob0a(58),prob0a(59)] = deal(4);
+[prob0a(40),prob0a(24),prob0a(52)] = deal(4);
 [prob0a(55),prob0a(45),prob0a(44),prob0a(28),prob0a(29),prob0a(12),prob0a(13),prob0a(8)] = deal(2);
 
 [prob0a(39),prob0a(23),prob0a(38),prob0a(22)] = deal(-8);
 [prob0a(7),prob0a(6),prob0a(51),prob0a(37)] = deal(-6);
 [prob0a(21),prob0a(36),prob0a(20),prob0a(5)] = deal(-4);
-[prob0a(4),prob0a(6),prob0a(35),prob0a(50),prob0a(19),prob0a(3)] = deal(-2);
+[prob0a(4),prob0a(6),prob0a(35),prob0a(50),prob0a(19),prob0a(3),prob0a(58),prob0a(59)] = deal(-2);
 
 prob0b = zeros(60,1);
-[prob0b(40),prob0b(24)] = deal(10);
+[prob0b(40),prob0b(24)] = deal(11);
 [prob0b(23),prob0b(39),prob0b(52),prob0b(8)] = deal(8);
 [prob0b(6),prob0b(22),prob0b(38),prob0b(51),prob0b(7)] = deal(6);
-[prob0b(53),prob0b(41),prob0b(25),prob0b(59),prob0b(58)] = deal(4);
+[prob0b(53),prob0b(41),prob0b(25)] = deal(4);
 [prob0b(5),prob0b(21),prob0b(37),prob0b(50),prob0b(36),prob0b(20),prob0b(4),prob0b(9)] = deal(2);
 
-[prob0b(42),prob0b(26),prob0b(27),prob0b(43)] = deal(-8);
-[prob0b(10),prob0b(54),prob0b(44),prob0b(11)] = deal(-6);
-[prob0b(12),prob0b(28),prob0b(29),prob0b(45)] = deal(-4);
-[prob0b(13),prob0b(14),prob0b(30),prob0b(46),prob0b(55)] = deal(-2);
+[prob0b(42),prob0b(26),prob0b(26),prob0b(42)] = deal(-8);
+[prob0b(9),prob0b(53),prob0b(43),prob0b(10)] = deal(-6);
+[prob0b(11),prob0b(27),prob0b(28),prob0b(44)] = deal(-4);
+[prob0b(12),prob0b(13),prob0b(29),prob0b(45),prob0b(54),prob0b(58),prob0b(57)] = deal(-2);
 
 prob3b = zeros(60,1);
 for i = 1:15
