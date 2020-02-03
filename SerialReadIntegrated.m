@@ -1,6 +1,6 @@
 clear all
 
-s = serialport("COM3",2000000);
+s = serialport("COM3",9600);
 s.FlowControl = "none";
 buffer = zeros(16,100);
 fig = figure;
@@ -22,7 +22,7 @@ prob0a = zeros(60,1);
 [prob0a(9),prob0a(26),prob0a(42),prob0a(53)] = deal(8);
 [prob0a(10),prob0a(11),prob0a(43),prob0a(54),prob0a(27)] = deal(6);
 [prob0a(40),prob0a(24),prob0a(52),prob0a(58),prob0a(59)] = deal(4);
-[prob0a(55),prob0a(45),prob0a(44),prob0a(28),prob0a(29),prob0a(12),prob0a(13),prob0a(8)] = deal(2);
+[prob0a(55),prob0a(45),prob0a(44),prob0a(28),prob0a(29),prob0a(12),prob0a(13),prob0a(8),prob0a(57),prob0a(60)] = deal(2);
 
 [prob0a(39),prob0a(23),prob0a(38),prob0a(22)] = deal(-8);
 [prob0a(7),prob0a(6),prob0a(51),prob0a(37)] = deal(-6);
@@ -34,13 +34,25 @@ prob0b = zeros(60,1);
 [prob0b(23),prob0b(39),prob0b(52),prob0b(8)] = deal(8);
 [prob0b(6),prob0b(22),prob0b(38),prob0b(51),prob0b(7)] = deal(6);
 [prob0b(53),prob0b(41),prob0b(25),prob0b(59),prob0b(58)] = deal(4);
-[prob0b(5),prob0b(21),prob0b(37),prob0b(50),prob0b(36),prob0b(20),prob0b(4),prob0b(9)] = deal(2);
+[prob0b(5),prob0b(21),prob0b(37),prob0b(50),prob0b(36),prob0b(20),prob0b(4),prob0b(9),prob0b(57),prob0b(60)] = deal(2);
 
 [prob0b(42),prob0b(26),prob0b(27),prob0b(43)] = deal(-8);
 [prob0b(10),prob0b(54),prob0b(44),prob0b(11)] = deal(-6);
 [prob0b(12),prob0b(28),prob0b(29),prob0b(45)] = deal(-4);
 [prob0b(13),prob0b(14),prob0b(30),prob0b(46),prob0b(55)] = deal(-2);
 
+prob0d = zeros(60,1);
+
+[prob0d(2:3),prob0d(18:19),prob0d(50:51)] = deal(-6);
+[prob0d(4:9),prob0d(20:25),prob0d(34:41),prob0d(57:60),prob0d(49),prob0d(52),prob0d(53)] = deal(-4);
+prob0d(54:56) = deal(-2);
+
+
+prob0c = zeros(60,1);
+
+[prob0c(14:15),prob0c(30:31),prob0c(54:55)] = deal(-6);
+[prob0c(8:13),prob0c(24:29),prob0c(41:34),prob0c(40:47),prob0c(57:60),prob0c(53),prob0c(52),prob0c(56)] = deal(-4);
+prob0c(49:51) = deal(-2);
 
 prob3b = zeros(60,1);
 for i = 1:15
@@ -144,47 +156,121 @@ for i = 57:60
     prob1a(boundadd(i,3,57,60)) = prob0b(i);
 end
 
-% prob0a = prob0a.*numbers(16);
-% prob0b = prob0b.*numbers(13);
 
+prob1c = zeros(60,1);
+for i = 1:16
+    prob1c(boundadd(i,4,1,16)) = prob0d(i);
+end
+for i = 17:32
+    prob1c(boundadd(i,4,17,32)) = prob0d(i);
+end
+for i = 33:48
+    prob1c(boundadd(i,4,33,48)) = prob0d(i);
+end
+for i = 49:56
+    prob1c(boundadd(i,2,49,56)) = prob0d(i);
+end
+for i = 57:60
+    prob1c(boundadd(i,1,57,60)) = prob0d(i);
+end
 
+prob2b = zeros(60,1);
+for i = 1:16
+    prob2b(boundadd(i,8,1,16)) = prob0d(i);
+end
+for i = 17:32
+    prob2b(boundadd(i,8,17,32)) = prob0d(i);
+end
+for i = 33:48
+    prob2b(boundadd(i,8,33,48)) = prob0d(i);
+end
+for i = 49:56
+    prob2b(boundadd(i,4,49,56)) = prob0d(i);
+end
+for i = 57:60
+    prob1c(boundadd(i,2,57,60)) = prob0d(i);
+end
+
+prob3a = zeros(60,1);
+for i = 1:16
+    prob3a(boundadd(i,12,1,16)) = prob0d(i);
+end
+for i = 17:32
+    prob3a(boundadd(i,12,17,32)) = prob0d(i);
+end
+for i = 33:48
+    prob3a(boundadd(i,12,33,48)) = prob0d(i);
+end
+for i = 49:56
+    prob3a(boundadd(i,6,49,56)) = prob0d(i);
+end
+for i = 57:60
+    prob3a(boundadd(i,3,57,60)) = prob0d(i);
+end
+
+prob1b = zeros(60,1);
+for i = 1:16
+    prob1b(boundadd(i,4,1,16)) = prob0c(i);
+end
+for i = 17:32
+    prob1b(boundadd(i,4,17,32)) = prob0c(i);
+end
+for i = 33:48
+    prob1b(boundadd(i,4,33,48)) = prob0c(i);
+end
+for i = 49:56
+    prob1b(boundadd(i,2,49,56)) = prob0c(i);
+end
+for i = 57:60
+    prob1b(boundadd(i,1,57,60)) = prob0d(i);
+end
+
+prob2a = zeros(60,1);
+
+for i = 1:16
+    prob2a(boundadd(i,8,1,16)) = prob0c(i);
+end
+for i = 17:32
+    prob2a(boundadd(i,8,17,32)) = prob0c(i);
+end
+for i = 33:48
+    prob2a(boundadd(i,8,33,48)) = prob0c(i);
+end
+for i = 49:56
+    prob2a(boundadd(i,4,49,56)) = prob0c(i);
+end
+for i = 57:60
+    prob2a(boundadd(i,2,57,60)) = prob0c(i);
+end
+prob3d = zeros(60,4);
+
+for i = 1:16
+    prob3d(boundadd(i,12,1,16)) = prob0c(i);
+end
+for i = 17:32
+    prob3d(boundadd(i,12,17,32)) = prob0c(i);
+end
+for i = 33:48
+    prob3d(boundadd(i,12,33,48)) = prob0c(i);
+end
+for i = 49:56
+    prob3d(boundadd(i,6,49,56)) = prob0c(i);
+end
+for i = 57:60
+    prob3d(boundadd(i,3,57,60)) = prob0c(i);
+end
+
+sc = zeros(60,6);
 while 1
+    
     hold on
     reading = readline(s);
     numbers = sscanf(reading, "%f");
-    %buffer(:,1) = [];
-%     buffer = [buffer,numbers];
-% 
-%     prob0a = zeros(60,1);
-%     [prob0a(24),prob0a(40)] = deal(10);
-%     [prob0a(8),prob0a(25),prob0a(41),prob0a(52)] = deal(8);
-%     [prob0a(9),prob0a(10),prob0a(42),prob0a(53),prob0a(26),prob0a(58)] = deal(6);
-%     [prob0a(39),prob0a(23),prob0a(51),prob0a(57)] = deal(4);
-%     [prob0a(54),prob0a(44),prob0a(43),prob0a(27),prob0a(28),prob0a(11),prob0a(12),prob0a(7)] = deal(2);
-% 
-%     [prob0a(38),prob0a(22),prob0a(37),prob0a(21)] = deal(-8);
-%     [prob0a(6),prob0a(5),prob0a(50),prob0a(36)] = deal(-6);
-%     [prob0a(20),prob0a(35),prob0a(19),prob0a(4)] = deal(-4);
-%     [prob0a(3),prob0a(5),prob0a(34),prob0a(49),prob0a(18),prob0a(2)] = deal(-2);
-% 
-%     prob0b = zeros(60,1);
-%     [prob0b(39),prob0b(23)] = deal(10);
-%     [prob0b(22),prob0b(38),prob0b(51),prob0b(7)] = deal(8);
-%     [prob0b(5),prob0b(21),prob0b(37),prob0b(50),prob0b(57),prob0b(6)] = deal(6);
-%     [prob0b(52),prob0b(40),prob0b(24),prob0b(58)] = deal(4);
-%     [prob0b(4),prob0b(20),prob0b(36),prob0b(49),prob0b(35),prob0b(19),prob0b(3),prob0b(8)] = deal(2);
-% 
-%     [prob0b(41),prob0b(25),prob0b(26),prob0b(42)] = deal(-8);
-%     [prob0b(9),prob0b(53),prob0b(43),prob0b(10)] = deal(-6);
-%     [prob0b(11),prob0b(27),prob0b(28),prob0b(44)] = deal(-4);
-%     [prob0b(12),prob0b(13),prob0b(29),prob0b(45),prob0b(54)] = deal(-2);
-%     
-%     prob0a = prob0a.*numbers(16);
-%     prob0b = prob0b.*numbers(13);
-    prob = -( prob0a.*numbers(9) + prob0b.*numbers(5) + prob3b.*numbers(6) + prob3c.*numbers(2)... 
-    + prob2c.*numbers(3) + prob2d.*numbers(15) + prob1d.*numbers(16) + prob1a.*numbers(12));
+    prob = -(prob0a.*numbers(1) + prob0b.*numbers(5) + prob3b.*numbers(8) + prob3c.*numbers(12)... 
+    + prob2c.*numbers(11) + prob2d.*numbers(15) + prob1d.*numbers(14) + prob1a.*numbers(2) ...
+    + prob0d.*numbers(13) + prob1c.*numbers(10) + prob2b.*numbers(7) + prob3a.*numbers(4)...
+    + prob0c.*numbers(9) + prob1b.*numbers(6) + prob2a.*numbers(3) + prob3d.*numbers(16));
     %prob = -prob0a.*numbers(2);
-
 
     rectangle('Position',pos0,'Curvature',[1 1])
     rectangle('Position',pos1,'Curvature',[1 1])
@@ -229,40 +315,46 @@ while 1
     point = max(prob);
     
     t1 = [];
-    sc = scatter(0,0, 5);
     
     for j = 0:2
         for i = 0:15
             if(i+j>0)
                 %t1 = [t1 text((2.25-j*rad)*cos(pi*1/16+i*angle),(2.25-j*rad)*sin(pi*1/16+i*angle),num2str(prob(j*16+i)))];
-                if((prob(j*16+i)) == point)
-                    set(sc,'XData',(2.25-j*rad)*cos(pi*1/16+i*angle),'YData',(2.25-j*rad)*sin(pi*1/16+i*angle));
-                    set(sc,'SizeData',point);
-                end
+                sc(j*16+i,:)  = [(2.25-j*rad)*cos(pi*1/16+i*angle) ,(2.25-j*rad)*sin(pi*1/16+i*angle), max(prob(j*16+i)*4, 1), [min(prob(j*16+i),255), max(255 - prob(j*16+i),0) 0]/255];
+%                if((prob(j*16+i)) == point && point > 30)
+%                     set(sc,'XData',(2.25-j*rad)*cos(pi*1/16+i*angle),'YData',(2.25-j*rad)*sin(pi*1/16+i*angle));
+%                     set(sc,'SizeData',point*10);
+%                     set(sc,'MarkerFaceColor',	[min(point,255) max(255 - point,0) 0]/255);
+                %end
             end
         end
     end
     for i = 0:7
             %t1 = [t1 text((0.75)*cos(pi*1/8+i*2*angle),(0.75)*sin(pi*1/8+i*2*angle),num2str(prob(48+i)))];
-            if((prob(48+i)) == point)
-                set(sc,'XData',((0.75)*cos(pi*1/8+i*2*angle)),'YData',(0.75)*sin(pi*1/8+i*2*angle));
-            end
+            sc(48+i,:) = [(0.75)*cos(pi*1/8+i*2*angle) ,(0.75)*sin(pi*1/8+i*2*angle),max(prob(48+i)*4,1),[min(prob(48+i),255) max(255 - prob(48+i),0) 0]/255];
+%            if((prob(48+i)) == point && point > 30)
+%                 set(sc,'XData',((0.75)*cos(pi*1/8+i*2*angle)),'YData',(0.75)*sin(pi*1/8+i*2*angle));
+%                 set(sc,'SizeData',point*10);
+%                 set(sc,'MarkerFaceColor',	[min(point,255) max(255 - point,0) 0]/255);
+            %end
     end
     for i = 0:4 
             %t1 = [t1 text((0.25)*cos(pi*1/4+i*4*angle),(0.25)*sin(pi*1/4+i*4*angle),num2str(prob(56+i)))];
-            if((prob(56+i)) == point)
-                set(sc,'XData',((0.25)*cos(pi*1/4+i*4*angle)),'YData',(0.25)*sin(pi*1/4+i*4*angle));
-            end
+            sc(56+i,:) = [(0.25)*cos(pi*1/4+i*4*angle) ,(0.25)*sin(pi*1/4+i*4*angle),max(prob(56+i)*4,1),[min(prob(56+i),255) max(255 - prob(56+i),0) 0]/255];
+%            if((prob(56+i)) == point && point > 30)
+%                 set(sc,'XData',((0.25)*cos(pi*1/4+i*4*angle)),'YData',(0.25)*sin(pi*1/4+i*4*angle));
+%                 set(sc,'SizeData',point*10);
+%                 set(sc,'MarkerFaceColor',	[min(point,255) max(255 - point,0) 0]/255);
+            %end
     end
    
     numbers;
-    pause(0.1)
-    delete(sc);
-    delete(t1);
-    %[numbers(5) numbers(9)]
-     
-    drawnow
     
+    map = scatter(sc(:,1),sc(:,2),sc(:,3),sc(:,4:6),'filled');
+    pause(0.1)
+    delete(map);
+    %[numbers(5) numbers(9)]
+
     hold off
     
     

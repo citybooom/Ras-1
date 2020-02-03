@@ -1,6 +1,6 @@
 clear all
 
-s = serialport("COM3",2000000);
+s = serialport("COM3",9600);
 buffer = zeros(16,100);
 fig = figure;
 tiledlayout(2,2)

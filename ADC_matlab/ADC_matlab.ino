@@ -58,7 +58,7 @@ int count = 0;
 
 void setup(void) 
 {
-  Serial.begin(2000000);  
+  Serial.begin(9600);  
   ads.begin();
   pinMode(2, OUTPUT); 
   pinMode(3, OUTPUT); 
@@ -195,8 +195,7 @@ void loop(void)
   Serial.print(" ");
   Serial.print(Voltage3a*100, 5);
   Serial.print("  ");
-  
-      
+        
      
   Serial.print(Voltage0b*100, 5); 
   Serial.print(" ");
