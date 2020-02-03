@@ -18,28 +18,34 @@ pos4 = [-2.5 -2.5 5 5];
 
 
 prob0a = zeros(60,1);
-[prob0a(25),prob0a(41)] = deal(10);
-[prob0a(9),prob0a(26),prob0a(42),prob0a(53)] = deal(8);
-[prob0a(10),prob0a(11),prob0a(43),prob0a(54),prob0a(27)] = deal(6);
-[prob0a(40),prob0a(24),prob0a(52),prob0a(58),prob0a(59)] = deal(4);
-[prob0a(55),prob0a(45),prob0a(44),prob0a(28),prob0a(29),prob0a(12),prob0a(13),prob0a(8),prob0a(57),prob0a(60)] = deal(2);
+[prob0a(8:11)] = deal(10);
+[prob0a(26),prob0a(42)] = deal(8);
+[prob0a(43),prob0a(54),prob0a(27),prob0a(25),prob0a(41)] = deal(6);
+[prob0a(40),prob0a(24),prob0a(53:54),prob0a(58),prob0a(59)] = deal(4);
+[prob0a(55),prob0a(45),prob0a(44),prob0a(28),prob0a(29),prob0a(12),prob0a(13),prob0a(57),prob0a(60)] = deal(2);
 
-[prob0a(39),prob0a(23),prob0a(38),prob0a(22)] = deal(-8);
-[prob0a(7),prob0a(6),prob0a(51),prob0a(37)] = deal(-6);
-[prob0a(21),prob0a(36),prob0a(20),prob0a(5)] = deal(-4);
-[prob0a(4),prob0a(6),prob0a(35),prob0a(50),prob0a(19),prob0a(3)] = deal(-2);
+[prob0a(5:7)] = deal(-8);
+[prob0a(1:3),prob0a(14:16),prob0a(21:23)] = deal(-6);
+[prob0a(36),prob0a(20),prob0a(30:32),prob0a(37:39),prob0a(17:18)] = deal(-4);
+[prob0a(4),prob0a(50),prob0a(19),prob0a(3),prob0a(33:35),prob0a(46:48),prob0a(51:52)] = deal(-2);
+
 
 prob0b = zeros(60,1);
-[prob0b(40),prob0b(24)] = deal(10);
-[prob0b(23),prob0b(39),prob0b(52),prob0b(8)] = deal(8);
-[prob0b(6),prob0b(22),prob0b(38),prob0b(51),prob0b(7)] = deal(6);
-[prob0b(53),prob0b(41),prob0b(25),prob0b(59),prob0b(58)] = deal(4);
-[prob0b(5),prob0b(21),prob0b(37),prob0b(50),prob0b(36),prob0b(20),prob0b(4),prob0b(9),prob0b(57),prob0b(60)] = deal(2);
-
-[prob0b(42),prob0b(26),prob0b(27),prob0b(43)] = deal(-8);
-[prob0b(10),prob0b(54),prob0b(44),prob0b(11)] = deal(-6);
-[prob0b(12),prob0b(28),prob0b(29),prob0b(45)] = deal(-4);
-[prob0b(13),prob0b(14),prob0b(30),prob0b(46),prob0b(55)] = deal(-2);
+for i = 1:15
+    prob0b(i) = prob0a(17-i);
+end
+for i = 16:31
+    prob0b(i) = prob0a(16 + 33 - i);
+end
+for i = 32:47
+    prob0b(i) = prob0a(32 + 49 - i);
+end
+for i = 49:56
+    prob0b(i) = prob0a(48 + 57 - i);
+end
+for i = 57:60
+    prob0b(i) = prob0a(56 + 61 - i);
+end
 
 prob0d = zeros(60,1);
 
@@ -49,10 +55,21 @@ prob0d(54:56) = deal(-2);
 
 
 prob0c = zeros(60,1);
-
-[prob0c(14:15),prob0c(30:31),prob0c(54:55)] = deal(-6);
-[prob0c(8:13),prob0c(24:29),prob0c(41:34),prob0c(40:47),prob0c(57:60),prob0c(53),prob0c(52),prob0c(56)] = deal(-4);
-prob0c(49:51) = deal(-2);
+for i = 1:15
+    prob0c(i) = prob0d(17-i);
+end
+for i = 16:31
+    prob0c(i) = prob0d(16 + 33 - i);
+end
+for i = 32:47
+    prob0c(i) = prob0d(32 + 49 - i);
+end
+for i = 49:56
+    prob0c(i) = prob0d(48 + 57 - i);
+end
+for i = 57:60
+    prob0c(i) = prob0d(56 + 61 - i);
+end
 
 prob3b = zeros(60,1);
 for i = 1:15

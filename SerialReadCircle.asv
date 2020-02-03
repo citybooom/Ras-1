@@ -50,19 +50,19 @@ prob0d(54:56) = deal(-2);
 
 prob0c = zeros(60,1);
 for i = 1:15
-    prob0c(i) = prob0d(17-i);
+    prob0b(i) = prob0a(17-i);
 end
 for i = 16:31
-    prob0c(i) = prob0d(16 + 33 - i);
+    prob0b(i) = prob0a(16 + 33 - i);
 end
 for i = 32:47
-    prob0c(i) = prob0d(32 + 49 - i);
+    prob0b(i) = prob0a(32 + 49 - i);
 end
 for i = 49:56
-    prob0c(i) = prob0d(48 + 57 - i);
+    prob0b(i) = prob0a(48 + 57 - i);
 end
 for i = 57:60
-    prob0c(i) = prob0d(56 + 61 - i);
+    prob0b(i) = prob0a(56 + 61 - i);
 end
 
 prob3b = zeros(60,1);
