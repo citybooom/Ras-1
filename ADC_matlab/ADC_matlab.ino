@@ -19,6 +19,7 @@ float Voltage0d = 0.0;
 float Voltage1d = 0.0;
 float Voltage2d = 0.0;
 float Voltage3d = 0.0;
+float k = 200;
 
 int16_t adc0a;  
 int16_t adc1a; 
@@ -187,42 +188,42 @@ void loop(void)
 
   if(Voltage0a >= 0)
   Serial.print(" ");
-  Serial.print(Voltage0a*100, 5); 
+  Serial.print(Voltage0a*k, 5); 
   Serial.print(" ");
-  Serial.print(Voltage1a*100, 5);
+  Serial.print(Voltage1a*k, 5);
   Serial.print(" ");
-  Serial.print(Voltage2a*100, 5);
+  Serial.print(Voltage2a*k, 5);
   Serial.print(" ");
-  Serial.print(Voltage3a*100, 5);
+  Serial.print(Voltage3a*k, 5);
   Serial.print("  ");
         
      
-  Serial.print(Voltage0b*100, 5); 
+  Serial.print(Voltage0b*k, 5); 
   Serial.print(" ");
-  Serial.print(Voltage1b*100, 5);
+  Serial.print(Voltage1b*k, 5);
   Serial.print(" ");
-  Serial.print(Voltage2b*100, 5);
+  Serial.print(Voltage2b*k, 5);
   Serial.print(" ");
-  Serial.print(Voltage3b*100, 5);
+  Serial.print(Voltage3b*k, 5);
   Serial.print("  ");  
   
-  Serial.print(Voltage0c*100, 5); 
+  Serial.print(Voltage0c*k, 5); 
   Serial.print(" ");
-  Serial.print(Voltage1c*100, 5);
+  Serial.print(Voltage1c*k, 5);
   Serial.print(" ");
-  Serial.print(Voltage2c*100, 5);
+  Serial.print(Voltage2c*k, 5);
   Serial.print(" ");
-  Serial.print(Voltage3c*100, 5);
+  Serial.print(Voltage3c*k, 5);
   Serial.print("  ");  
  
        
-  Serial.print(Voltage0d*100, 5); 
+  Serial.print(Voltage0d*k, 5); 
   Serial.print(" ");
-  Serial.print(Voltage1d*100, 5);
+  Serial.print(Voltage1d*k, 5);
   Serial.print(" ");
-  Serial.print(Voltage2d*100, 5);
+  Serial.print(Voltage2d*k, 5);
   Serial.print(" ");
-  Serial.println(Voltage3d*100, 5);
+  Serial.println(Voltage3d*k, 5);
 
   count = count + 1;  
 

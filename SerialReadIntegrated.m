@@ -1,9 +1,9 @@
 clear all
 
-s = serialport("COM3",9600);
+s = serialport("COM9",9600);
 s.FlowControl = "none";
 buffer = zeros(16,100);
-fig = figure;
+fig3 = figure;
 axis([-2.5 2.5 -2.5 2.5]);
 x = linspace(1,100,100);
 center = [0,0,0,0,0];
@@ -16,28 +16,30 @@ pos3 = [-2 -2 4 4];
 pos4 = [-2.5 -2.5 5 5];
 
 
-
 prob0a = zeros(60,1);
-[prob0a(8:11)] = deal(10);
-[prob0a(26),prob0a(42)] = deal(8);
-[prob0a(43),prob0a(54),prob0a(27),prob0a(25),prob0a(41)] = deal(6);
-[prob0a(40),prob0a(24),prob0a(53:54),prob0a(58),prob0a(59)] = deal(4);
-[prob0a(55),prob0a(45),prob0a(44),prob0a(28),prob0a(29),prob0a(12),prob0a(13),prob0a(57),prob0a(60)] = deal(2);
+[prob0a(10)] = deal(10);
+[prob0a(26),prob0a(42),prob0a(9),prob0a(11)] = deal(8);  
+[prob0a(43),prob0a(54),prob0a(27),prob0a(25),prob0a(41),prob0a(59),prob0a(8)] = deal(6);
+[prob0a(40),prob0a(24),prob0a(53:54),prob0a(28:29)] = deal(4);
+[prob0a(58),prob0a(60)] = deal(3);
+[prob0a(55),prob0a(57),prob0a(44:45)] = deal(2);
 
-[prob0a(5:7)] = deal(-8);
-[prob0a(1:3),prob0a(14:16),prob0a(21:23)] = deal(-6);
-[prob0a(36),prob0a(20),prob0a(30:32),prob0a(37:39),prob0a(17:18)] = deal(-4);
-[prob0a(4),prob0a(50),prob0a(19),prob0a(3),prob0a(33:35),prob0a(46:48),prob0a(51:52)] = deal(-2);
 
+[prob0a(1:4)] = deal(-30);
+[prob0a(14:16),prob0a(5:7)] = deal(-10);
+[prob0a(19:23),prob0a(12:13)] = deal(-8);
+[prob0a(30:32),prob0a(37:39)] = deal(-6);
+[prob0a(33:36),prob0a(17:18),prob0a(46:48)] = deal(-4);
+[prob0a(50),prob0a(51:52)] = deal(-2);
 
 prob0b = zeros(60,1);
-for i = 1:15
+for i = 1:16
     prob0b(i) = prob0a(17-i);
 end
-for i = 16:31
+for i = 17:32
     prob0b(i) = prob0a(16 + 33 - i);
 end
-for i = 32:47
+for i = 33:48
     prob0b(i) = prob0a(32 + 49 - i);
 end
 for i = 49:56
@@ -49,19 +51,25 @@ end
 
 prob0d = zeros(60,1);
 
-[prob0d(2:3),prob0d(18:19),prob0d(50:51)] = deal(-6);
-[prob0d(4:9),prob0d(20:25),prob0d(34:41),prob0d(57:60),prob0d(49),prob0d(52),prob0d(53)] = deal(-4);
-prob0d(54:56) = deal(-2);
+[prob0d(13:16)] = deal(15);
+[prob0d(29:32)] = deal(8);
+[prob0d(1:3),prob0d(18:19),prob0d(50:51),prob0d(4:12)] = deal(-10);
+[prob0d(20:25),prob0d(34:41),prob0d(57:60),prob0d(49),prob0d(52),prob0d(53)] = deal(-4);
+[prob0d(54:56)] = deal(-2);
+
+
+
+
 
 
 prob0c = zeros(60,1);
-for i = 1:15
+for i = 1:16
     prob0c(i) = prob0d(17-i);
 end
-for i = 16:31
+for i = 17:32
     prob0c(i) = prob0d(16 + 33 - i);
 end
-for i = 32:47
+for i = 33:48
     prob0c(i) = prob0d(32 + 49 - i);
 end
 for i = 49:56
@@ -284,10 +292,14 @@ while 1
     reading = readline(s);
     numbers = sscanf(reading, "%f");
     prob = -(prob0a.*numbers(1) + prob0b.*numbers(5) + prob3b.*numbers(8) + prob3c.*numbers(12)... 
-    + prob2c.*numbers(11) + prob2d.*numbers(15) + prob1d.*numbers(14) + prob1a.*numbers(2) ...
-    + prob0d.*numbers(13) + prob1c.*numbers(10) + prob2b.*numbers(7) + prob3a.*numbers(4)...
-    + prob0c.*numbers(9) + prob1b.*numbers(6) + prob2a.*numbers(3) + prob3d.*numbers(16));
-    %prob = -prob0a.*numbers(2);
+    + prob2c.*numbers(11)*0.8 + prob2d.*numbers(15)*0.8 + prob1d.*numbers(14) + prob1a.*numbers(2) ...
+    + prob0d.*numbers(13) + prob1c.*numbers(10) + prob2b.*numbers(7)*0.8 + prob3a.*numbers(4)...
+    + prob0c.*numbers(9) + prob1b.*numbers(6)*0.8 + prob2a.*numbers(3) + prob3d.*numbers(16));
+
+%     prob = -(prob0a.*numbers(1) + prob0b.*numbers(5) + prob3b.*numbers(8) + prob3c.*numbers(12)... 
+%     + prob2c.*numbers(11) + prob2d.*numbers(15) + prob1d.*numbers(14) + prob1a.*numbers(2));
+
+%     prob = -(prob0a.*numbers(1));
 
     rectangle('Position',pos0,'Curvature',[1 1])
     rectangle('Position',pos1,'Curvature',[1 1])
@@ -332,12 +344,12 @@ while 1
     point = max(prob);
     
     t1 = [];
-    
+    sc(1,:)  = [(2.25)*cos(pi*1/16),(2.25)*sin(pi*1/16), max(prob(1)*2, 1), [min(prob(1),255), max(255 - prob(1),0) 0]/255];            
     for j = 0:2
-        for i = 0:15
+        for i = 1:16
             if(i+j>0)
                 %t1 = [t1 text((2.25-j*rad)*cos(pi*1/16+i*angle),(2.25-j*rad)*sin(pi*1/16+i*angle),num2str(prob(j*16+i)))];
-                sc(j*16+i,:)  = [(2.25-j*rad)*cos(pi*1/16+i*angle) ,(2.25-j*rad)*sin(pi*1/16+i*angle), max(prob(j*16+i)*4, 1), [min(prob(j*16+i),255), max(255 - prob(j*16+i),0) 0]/255];
+                sc(j*16+i,:)  = [(2.25-j*rad)*cos(pi*1/16+i*angle) ,(2.25-j*rad)*sin(pi*1/16+i*angle), max(prob(j*16+i)*2, 1), [min(prob(j*16+i),255), max(255 - prob(j*16+i),0) 0]/255];
 %                if((prob(j*16+i)) == point && point > 30)
 %                     set(sc,'XData',(2.25-j*rad)*cos(pi*1/16+i*angle),'YData',(2.25-j*rad)*sin(pi*1/16+i*angle));
 %                     set(sc,'SizeData',point*10);
@@ -348,16 +360,16 @@ while 1
     end
     for i = 0:7
             %t1 = [t1 text((0.75)*cos(pi*1/8+i*2*angle),(0.75)*sin(pi*1/8+i*2*angle),num2str(prob(48+i)))];
-            sc(48+i,:) = [(0.75)*cos(pi*1/8+i*2*angle) ,(0.75)*sin(pi*1/8+i*2*angle),max(prob(48+i)*4,1),[min(prob(48+i),255) max(255 - prob(48+i),0) 0]/255];
+            sc(49+i,:) = [(0.75)*cos(pi*1/8+i*2*angle) ,(0.75)*sin(pi*1/8+i*2*angle),max(prob(48+i)*2,1),[min(prob(48+i),255) max(255 - prob(48+i),0) 0]/255];
 %            if((prob(48+i)) == point && point > 30)
 %                 set(sc,'XData',((0.75)*cos(pi*1/8+i*2*angle)),'YData',(0.75)*sin(pi*1/8+i*2*angle));
 %                 set(sc,'SizeData',point*10);
 %                 set(sc,'MarkerFaceColor',	[min(point,255) max(255 - point,0) 0]/255);
             %end
     end
-    for i = 0:4 
+    for i = 0:3 
             %t1 = [t1 text((0.25)*cos(pi*1/4+i*4*angle),(0.25)*sin(pi*1/4+i*4*angle),num2str(prob(56+i)))];
-            sc(56+i,:) = [(0.25)*cos(pi*1/4+i*4*angle) ,(0.25)*sin(pi*1/4+i*4*angle),max(prob(56+i)*4,1),[min(prob(56+i),255) max(255 - prob(56+i),0) 0]/255];
+            sc(57+i,:) = [(0.25)*cos(pi*1/4+i*4*angle) ,(0.25)*sin(pi*1/4+i*4*angle),max(prob(56+i)*2,1),[min(prob(56+i),255) max(255 - prob(56+i),0) 0]/255];
 %            if((prob(56+i)) == point && point > 30)
 %                 set(sc,'XData',((0.25)*cos(pi*1/4+i*4*angle)),'YData',(0.25)*sin(pi*1/4+i*4*angle));
 %                 set(sc,'SizeData',point*10);
@@ -366,7 +378,6 @@ while 1
     end
    
     numbers;
-    
     map = scatter(sc(:,1),sc(:,2),sc(:,3),sc(:,4:6),'filled');
     pause(0.1)
     delete(map);
