@@ -19,7 +19,7 @@ float Voltage0d = 0.0;
 float Voltage1d = 0.0;
 float Voltage2d = 0.0;
 float Voltage3d = 0.0;
-float k = 50;
+float k = 100;
 
 int16_t adc0a;  
 int16_t adc1a; 
@@ -73,23 +73,21 @@ int16_t base2d;
 int16_t base3d;
 
 int count = 0;
-float diff = 0;
+int diff = 0;
 int basediff = 0;
-int delaytime = 1;
-int state = 0;
-int statecount = 0;
-float diffthresh = 3;
 
 void setup(void) 
 {
   Serial.begin(9600);  
   ads.begin();
-  pinMode(2, OUTPUT); 
-  pinMode(3, OUTPUT); 
-  pinMode(4, OUTPUT); 
-  pinMode(5, OUTPUT);
- 
-  delay(delaytime);
+  pinMode(1, OUTPUT); 
+  pinMode(9, OUTPUT); 
+  pinMode(10, OUTPUT); 
+  pinMode(11, OUTPUT);
+
+  digitalWrite(11, LOW);
+  digitalWrite(1, HIGH);
+  delay(1);
   
   base0a = ads.readADC_SingleEnded(0);
   base1a = ads.readADC_SingleEnded(1);
@@ -97,9 +95,9 @@ void setup(void)
   base3a = ads.readADC_SingleEnded(3);
     
 
-  digitalWrite(2, LOW);
-  digitalWrite(3, HIGH);
-  delay(delaytime);
+  digitalWrite(1, LOW);
+  digitalWrite(9, HIGH);
+  delay(1);
 
   
   base0b = ads.readADC_SingleEnded(0);
@@ -108,9 +106,9 @@ void setup(void)
   base3b = ads.readADC_SingleEnded(3);
   
    
-  digitalWrite(3, LOW);
-  digitalWrite(4, HIGH);
-  delay(delaytime);
+  digitalWrite(9, LOW);
+  digitalWrite(10, HIGH);
+  delay(1);
 
   
   base0c = ads.readADC_SingleEnded(0);
@@ -119,9 +117,9 @@ void setup(void)
   base3c = ads.readADC_SingleEnded(3);
   
   
-  digitalWrite(4, LOW);
-  digitalWrite(5, HIGH);
-  delay(delaytime);
+  digitalWrite(10, LOW);
+  digitalWrite(11, HIGH);
+  delay(1);
 
 
   base0d = ads.readADC_SingleEnded(0);
@@ -134,9 +132,9 @@ void setup(void)
 
 void loop(void) 
 {
-  digitalWrite(2, LOW);
-  digitalWrite(3, HIGH);
-  delay(delaytime);
+  digitalWrite(11, LOW);
+  digitalWrite(1, HIGH);
+  delay(1);
 
   adc0aold = adc0a;
   adc1aold = adc1a;
@@ -158,9 +156,9 @@ void loop(void)
     base3a = adc3a;
   }
   
-  digitalWrite(3, LOW);
-  digitalWrite(4, HIGH);
-  delay(delaytime);
+  digitalWrite(1, LOW);
+  digitalWrite(9, HIGH);
+  delay(1);
 
   adc0bold = adc0b;
   adc1bold = adc1b;
@@ -182,9 +180,9 @@ void loop(void)
     base3b = adc3b;
   }
 
-  digitalWrite(4, LOW);
-  digitalWrite(5, HIGH);
-  delay(delaytime);
+  digitalWrite(9, LOW);
+  digitalWrite(10, HIGH);
+  delay(1);
 
   adc0cold = adc0c;
   adc1cold = adc1c;
@@ -208,9 +206,9 @@ void loop(void)
   }
 
 
-  digitalWrite(5, LOW);
-  digitalWrite(2, HIGH);
-  delay(delaytime);
+  digitalWrite(10, LOW);
+  digitalWrite(11, HIGH);
+  delay(1);
 
   adc0dold = adc0d;
   adc1dold = adc1d;
@@ -226,11 +224,11 @@ void loop(void)
   Voltage2d = ((base2d-adc2d) * 0.1875)/1000;
   Voltage3d = ((base3d-adc3d) * 0.1875)/1000;
 
-  diff =(abs(adc0a) - abs(adc0aold) +  abs(adc1a) - abs(adc1aold) +  abs(adc2a) - abs(adc2aold) +  abs(adc3a) - abs(adc3aold) +
-         abs(adc0b) - abs(adc0bold) +  abs(adc1b) - abs(adc1bold) +  abs(adc2b) - abs(adc2bold) +  abs(adc3b) - abs(adc3bold) +
-         abs(adc0c) - abs(adc0cold) +  abs(adc1c) - abs(adc1cold) +  abs(adc2c) - abs(adc2cold) +  abs(adc3c) - abs(adc3cold) +
-         abs(adc0d) - abs(adc0dold) +  abs(adc1d) - abs(adc1dold) +  abs(adc2d) - abs(adc2dold) +  abs(adc3d) - abs(adc3dold))*0.1875/10;
- 
+  diff = abs(adc0a - adc0aold) +  abs(adc1a - adc1aold) +  abs(adc2a - adc2aold) +  abs(adc3a - adc3aold) +
+         abs(adc0b - adc0bold) +  abs(adc1b - adc1bold) +  abs(adc2b - adc2bold) +  abs(adc3b - adc3bold) + 
+         abs(adc0c - adc0dold) +  abs(adc1c - adc1cold) +  abs(adc2c - adc2cold) +  abs(adc3c - adc3cold) +
+         abs(adc0d - adc0dold) +  abs(adc1d - adc1dold) +  abs(adc2d - adc3dold) +  abs(adc3d - adc3dold);
+  
   if (count < 20) {
     base0d = adc0d;
     base1d = adc1d;
@@ -238,80 +236,45 @@ void loop(void)
     base3d = adc3d;
     basediff = diff;
   }
-//  if (state == 2) {
-//    base0d = adc0d;
-//    base1d = adc1d;
-//    base2d = adc2d;
-//    base3d = adc3d;
-//    base0c = adc0c;
-//    base1c = adc1c;
-//    base2c = adc2c;
-//    base3c = adc3c;
-//    base0a = adc0a;
-//    base1a = adc1a;
-//    base2a = adc2a;
-//    base3a = adc3a;
-//    base0b = adc0b;
-//    base1b = adc1b;
-//    base2b = adc2b;
-//    base3b = adc3b;
-//    state = 0;
-//  }
-//  if((diff-basediff) > diffthresh && state == 0){
-//    state = 1;
-//  }
-//  if (state == 1){
-//    statecount = statecount + 1;
-//    if (diff < -diffthresh) {
-//      state = 0;
-//      statecount = 0;
-//    }
-//    if (statecount > 8) {
-//      state = 2;
-//      statecount = 0;
-//    }
-//  }
-//  
-  if(count > 5) {
-    Serial.print(Voltage0a*k, 5); 
-    Serial.print(" ");
-    Serial.print(Voltage1a*k, 5);
-    Serial.print(" ");
-    Serial.print(Voltage2a*k, 5);
-    Serial.print(" ");
-    Serial.print(Voltage3a*k, 5);
-    Serial.print("  ");
-          
-       
-    Serial.print(Voltage0b*k, 5); 
-    Serial.print(" ");
-    Serial.print(Voltage1b*k, 5);
-    Serial.print(" ");
-    Serial.print(Voltage2b*k, 5);
-    Serial.print(" ");
-    Serial.print(Voltage3b*k, 5);
-    Serial.print("  ");  
-    
-    Serial.print(Voltage0c*k, 5); 
-    Serial.print(" ");
-    Serial.print(Voltage1c*k, 5);
-    Serial.print(" ");
-    Serial.print(Voltage2c*k, 5);
-    Serial.print(" ");
-    Serial.print(Voltage3c*k, 5);
-    Serial.print("  ");  
-   
-         
-    Serial.print(Voltage0d*k, 5); 
-    Serial.print(" ");
-    Serial.print(Voltage1d*k, 5);
-    Serial.print(" ");
-    Serial.print(Voltage2d*k, 5);
-//    Serial.print(" ");
-//    Serial.print((diff-basediff), 5);
-    Serial.print(" ");
-    Serial.println(Voltage3d*k, 5);
-  }
-  count = count + 1;  
+
+
+  Serial.print(Voltage0a*k, 5); 
+  Serial.print(" ");
+  Serial.print(Voltage1a*k, 5);
+  Serial.print(" ");
+  Serial.print(Voltage2a*k, 5);
+  Serial.print(" ");
+  Serial.print(Voltage3a*k, 5);
+  Serial.print("  ");
+        
+     
+  Serial.print(Voltage0b*k, 5); 
+  Serial.print(" ");
+  Serial.print(Voltage1b*k, 5);
+  Serial.print(" ");
+  Serial.print(Voltage2b*k, 5);
+  Serial.print(" ");
+  Serial.print(Voltage3b*k, 5);
+  Serial.print("  ");  
+  
+  Serial.print(Voltage0c*k, 5); 
+  Serial.print(" ");
+  Serial.print(Voltage1c*k, 5);
+  Serial.print(" ");
+  Serial.print(Voltage2c*k, 5);
+  Serial.print(" ");
+  Serial.print(Voltage3c*k, 5);
+  Serial.print("  ");  
  
+       
+  Serial.print(Voltage0d*k, 5); 
+  Serial.print(" ");
+  Serial.print(Voltage1d*k, 5);
+  Serial.print(" ");
+  Serial.print(Voltage2d*k, 5);
+  Serial.print(" ");
+  Serial.println(Voltage3d*k, 5);
+
+  count = count + 1;  
+
 }

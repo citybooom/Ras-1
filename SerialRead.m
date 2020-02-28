@@ -1,6 +1,6 @@
 clear all
 
-s = serialport("COM9",9600);
+s = serialport("COM3",9600);
 buffer = zeros(16,100);
 fig4 = figure;
 tiledlayout(2,2)
@@ -28,8 +28,7 @@ while 1
     Graph4 = plot(x, buffer(8,:),x, buffer(12,:),x, buffer(4,:),x, buffer(16,:));
     axis([0 100 -30 30])
     
-    numbers(2)
-    
+    drawnow
 end
 
 
