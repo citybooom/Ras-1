@@ -19,17 +19,17 @@ pos4 = [-2.5 -2.5 5 5];
 prob0a = zeros(60,1);
 [prob0a(10)] = deal(17);
 [prob0a(26),prob0a(9),prob0a(11)] = deal(13);  
-[prob0a(54),prob0a(27),prob0a(25),prob0a(59),prob0a(8),prob0a(12)] = deal(11);
+[prob0a(54),prob0a(27),prob0a(25),prob0a(8),prob0a(12)] = deal(11);
 [prob0a(42)] = deal(13);
-[prob0a(40),prob0a(24),prob0a(53:54),prob0a(29)] = deal(4);
+[prob0a(40),prob0a(24),prob0a(53:54),prob0a(29),prob0a(59)] = deal(4);
 [prob0a(28),prob0a(43),prob0a(41)] = deal(8);
 [prob0a(44)] = deal(5);
 [prob0a(58),prob0a(60)] = deal(3);
 [prob0a(55),prob0a(57),prob0a(45)] = deal(2);
 
 
-[prob0a(1:4)] = deal(-40);
-[prob0a(14:16),prob0a(5:7)] = deal(-40);
+[prob0a(1:4)] = deal(-60);
+[prob0a(14:16),prob0a(5:7)] = deal(-60);
 [prob0a(19:23),prob0a(13)] = deal(-14);
 [prob0a(30:32),prob0a(37:39)] = deal(-8);
 [prob0a(33:36),prob0a(17:18),prob0a(46:48)] = deal(-6);
@@ -387,7 +387,7 @@ while 1
     map = scatter(sc(:,1),sc(:,2),sc(:,3),sc(:,4:6),'filled');
     %map = scatter(sc(ind(1:5),1),sc(ind(1:5),2),sc(ind(1:5),3),sc(ind(1:5),4:6),'filled');
     %map = scatter(mean(sc(ind(1:5),1)),mean(sc(ind(1:5),2)),sc(ind(1),3),sc(ind(1),4:6),'filled');
-    pause(0.02)
+    pause(0.1)
     delete(map);
     %[numbers(5) numbers(9)]
     axis equal

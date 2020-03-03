@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
-Adafruit_ADS1115 ads(0x48);
+Adafruit_ADS1015 ads(0x48);
+
 
 
 float Voltage0a = 0.0;
@@ -19,7 +20,9 @@ float Voltage0d = 0.0;
 float Voltage1d = 0.0;
 float Voltage2d = 0.0;
 float Voltage3d = 0.0;
-float k = 50;
+float k = 700;
+float correction = 100;
+float total = 0.0;
 
 int16_t adc0a;  
 int16_t adc1a; 
@@ -75,7 +78,7 @@ int16_t base3d;
 int count = 0;
 float diff = 0;
 int basediff = 0;
-int delaytime = 1;
+int delaytime = 5;
 int state = 0;
 int statecount = 0;
 float diffthresh = 3;
@@ -84,6 +87,7 @@ void setup(void)
 {
   Serial.begin(9600);  
   ads.begin();
+  ads.setGain(GAIN_TWO);
   pinMode(2, OUTPUT); 
   pinMode(3, OUTPUT); 
   pinMode(4, OUTPUT); 
@@ -147,10 +151,11 @@ void loop(void)
   adc1a = ads.readADC_SingleEnded(1);
   adc2a = ads.readADC_SingleEnded(2);
   adc3a = ads.readADC_SingleEnded(3);
-  Voltage0a = ((base0a-adc0a) * 0.1875)/1000;
-  Voltage1a = ((base1a-adc1a) * 0.1875)/1000;
-  Voltage2a = ((base2a-adc2a) * 0.1875)/1000;
-  Voltage3a = ((base3a-adc3a) * 0.1875)/1000;
+  
+  Voltage0a = ((base0a-adc0a)*0.1875)*0.001;
+  Voltage1a = ((base1a-adc1a)*0.1875)*0.001;
+  Voltage2a = ((base2a-adc2a)*0.1875)*0.001;
+  Voltage3a = ((base3a-adc3a)*0.1875)*0.001;
   if (count < 20) {
     base0a = adc0a;
     base1a = adc1a;
@@ -230,6 +235,10 @@ void loop(void)
          abs(adc0b) - abs(adc0bold) +  abs(adc1b) - abs(adc1bold) +  abs(adc2b) - abs(adc2bold) +  abs(adc3b) - abs(adc3bold) +
          abs(adc0c) - abs(adc0cold) +  abs(adc1c) - abs(adc1cold) +  abs(adc2c) - abs(adc2cold) +  abs(adc3c) - abs(adc3cold) +
          abs(adc0d) - abs(adc0dold) +  abs(adc1d) - abs(adc1dold) +  abs(adc2d) - abs(adc2dold) +  abs(adc3d) - abs(adc3dold))*0.1875/10;
+
+  total = abs(Voltage0a) + abs(Voltage1a) + abs(Voltage2a) + abs(Voltage3a) + abs(Voltage0b) + abs(Voltage1b) + abs(Voltage2b) + abs(Voltage3b) 
+        + abs(Voltage0c) + abs(Voltage1c) + abs(Voltage2c) + abs(Voltage3c) + abs(Voltage0d) + abs(Voltage1d) + abs(Voltage2d) + abs(Voltage3d);
+      
  
   if (count < 20) {
     base0d = adc0d;
@@ -238,41 +247,27 @@ void loop(void)
     base3d = adc3d;
     basediff = diff;
   }
-//  if (state == 2) {
-//    base0d = adc0d;
-//    base1d = adc1d;
-//    base2d = adc2d;
-//    base3d = adc3d;
-//    base0c = adc0c;
-//    base1c = adc1c;
-//    base2c = adc2c;
-//    base3c = adc3c;
-//    base0a = adc0a;
-//    base1a = adc1a;
-//    base2a = adc2a;
-//    base3a = adc3a;
-//    base0b = adc0b;
-//    base1b = adc1b;
-//    base2b = adc2b;
-//    base3b = adc3b;
-//    state = 0;
-//  }
-//  if((diff-basediff) > diffthresh && state == 0){
-//    state = 1;
-//  }
-//  if (state == 1){
-//    statecount = statecount + 1;
-//    if (diff < -diffthresh) {
-//      state = 0;
-//      statecount = 0;
-//    }
-//    if (statecount > 8) {
-//      state = 2;
-//      statecount = 0;
-//    }
-//  }
-//  
-  if(count > 5) {
+  if (abs(diff-basediff) < diffthresh && total < 0.01) {
+    base0a = base0a + (adc0a - base0a)/abs(adc0a - base0a);
+    base0b = base0b + (adc0b - base0b)/abs(adc0b - base0b);
+    base0c = base0c + (adc0c - base0c)/abs(adc0c - base0c);
+    base0d = base0d + (adc0d - base0d)/abs(adc0d - base0d);
+    base1a = base1a + (adc1a - base1a)/abs(adc1a - base1a);
+    base1b = base1b + (adc1b - base1b)/abs(adc1b - base1b);
+    base1c = base1c + (adc1c - base1c)/abs(adc1c - base1c);
+    base1d = base1d + (adc1d - base1d)/abs(adc1d - base1d);
+    base2a = base2a + (adc2a - base2a)/abs(adc2a - base2a);
+    base2b = base2b + (adc2b - base2b)/abs(adc2b - base2b);
+    base2c = base2c + (adc2c - base2c)/abs(adc2c - base2c);
+    base2d = base2d + (adc2d - base2d)/abs(adc2d - base2d);
+    base3a = base3a + (adc3a - base3a)/abs(adc3a - base3a);
+    base3b = base3b + (adc3b - base3b)/abs(adc3b - base3b);
+    base3c = base3c + (adc3c - base3c)/abs(adc3c - base3c);
+    base3d = base3d + (adc3d - base3d)/abs(adc3d - base3d);
+  }
+
+  
+  if(count > 10) {
     Serial.print(Voltage0a*k, 5); 
     Serial.print(" ");
     Serial.print(Voltage1a*k, 5);
@@ -307,8 +302,6 @@ void loop(void)
     Serial.print(Voltage1d*k, 5);
     Serial.print(" ");
     Serial.print(Voltage2d*k, 5);
-//    Serial.print(" ");
-//    Serial.print((diff-basediff), 5);
     Serial.print(" ");
     Serial.println(Voltage3d*k, 5);
   }
