@@ -1,7 +1,5 @@
 clear all
 
-% s = serialport("COM3",2000000);
-
 center = [0,0,0,0,0];
 radii = [1,2,3,4,5];
 
@@ -48,6 +46,16 @@ end
 for i = 57:60
     prob0b(i) = prob0a(56 + 61 - i);
 end
+
+prob0e = zeros(60,1);
+
+[prob0e(8:9)] = deal(15);
+[prob0e(24:25)] = deal(10);
+[prob0e(40:41)] = deal(8);
+[prob0e(52:53)] = deal(6);
+[prob0e(58:59)] = deal(4);
+[prob0e(57),prob0e(60)] = deal(-4);
+
 
 prob0d = zeros(60,1);
 
@@ -148,7 +156,7 @@ end
 
 prob2d = zeros(60,1);
 for i = 1:15
-    prob2d(boundadd(i,8,1,16)) = prob0b(i);
+    prob2c(boundadd(i,8,1,16)) = prob0b(i);
 end
 for i = 16:31
     prob2d(boundadd(i,8,17,32)) = prob0b(i);
@@ -363,19 +371,19 @@ line([sin(pi*1/8)*1.0,  sin(1/8*pi)*2.5],   [cos(1/8*pi)*1.0,   cos(1/8*pi)*2.5]
 
 angle = pi/8;
 rad = 0.5;
-text((2.25)*cos(pi*1/16),(2.25)*sin(pi*1/16),num2str(prob0d(1)))
+text((2.25)*cos(pi*1/16),(2.25)*sin(pi*1/16),num2str(prob0e(1)))
 for j = 0:2
     for i = 0:15
         if(i+j>0)
-            text((2.25-j*rad)*cos(pi*1/16+i*angle),(2.25-j*rad)*sin(pi*1/16+i*angle),num2str(prob0d(j*16+i+1)));
+            text((2.25-j*rad)*cos(pi*1/16+i*angle),(2.25-j*rad)*sin(pi*1/16+i*angle),num2str(prob0e(j*16+i+1)));
         end
     end
 end
 for i = 0:7
-        text((0.75)*cos(pi*1/8+i*2*angle),(0.75)*sin(pi*1/8+i*2*angle),num2str(prob0d(48+i+1)));
+        text((0.75)*cos(pi*1/8+i*2*angle),(0.75)*sin(pi*1/8+i*2*angle),num2str(prob0e(48+i+1)));
 end
 for i = 0:3 
-        text((0.25)*cos(pi*1/4+i*4*angle),(0.25)*sin(pi*1/4+i*4*angle),num2str(prob0d(56+i+1)));
+        text((0.25)*cos(pi*1/4+i*4*angle),(0.25)*sin(pi*1/4+i*4*angle),num2str(prob0e(56+i+1)));
 end
 
 fig2 = figure;

@@ -38,6 +38,14 @@ prob0a = zeros(60,1);
 [prob0a(50),prob0a(51:52)] = deal(-2);
 
 
+prob0e = zeros(60,1);
+
+[prob0e(8:9)] = deal(15);
+[prob0e(24:25)] = deal(10);
+[prob0e(40:41)] = deal(8);
+[prob0e(52:53)] = deal(6);
+[prob0e(58:59)] = deal(4);
+[prob0e(57),prob0e(60)] = deal(-4);
 
 
 prob0b = zeros(60,1);
@@ -57,32 +65,6 @@ for i = 57:60
     prob0b(i) = prob0a(56 + 61 - i);
 end
 
-prob0d = zeros(60,1);
-
-% [prob0d(13:16)] = deal(15);
-% [prob0d(29:32)] = deal(8);
-% [prob0d(1:3),prob0d(18:19),prob0d(50:51),prob0d(4:12)] = deal(-10);
-% [prob0d(20:25),prob0d(34:41),prob0d(57:60),prob0d(49),prob0d(52),prob0d(53)] = deal(-4);
-% [prob0d(54:56)] = deal(-2);
-
-
-
-prob0c = zeros(60,1);
-for i = 1:16
-    prob0c(i) = prob0d(17-i);
-end
-for i = 17:32
-    prob0c(i) = prob0d(16 + 33 - i);
-end
-for i = 33:48
-    prob0c(i) = prob0d(32 + 49 - i);
-end
-for i = 49:56
-    prob0c(i) = prob0d(48 + 57 - i);
-end
-for i = 57:60
-    prob0c(i) = prob0d(56 + 61 - i);
-end
 
 prob3b = zeros(60,1);
 for i = 1:15
@@ -154,7 +136,7 @@ end
 
 prob2d = zeros(60,1);
 for i = 1:15
-    prob2c(boundadd(i,8,1,16)) = prob0b(i);
+    prob2d(boundadd(i,8,1,16)) = prob0b(i);
 end
 for i = 16:31
     prob2d(boundadd(i,8,17,32)) = prob0b(i);
@@ -187,108 +169,57 @@ for i = 57:60
 end
 
 
-prob1c = zeros(60,1);
+prob1e = zeros(60,1);
 for i = 1:16
-    prob1c(boundadd(i,4,1,16)) = prob0d(i);
+    prob1e(boundadd(i,4,1,16)) = prob0e(i);
 end
 for i = 17:32
-    prob1c(boundadd(i,4,17,32)) = prob0d(i);
+    prob1e(boundadd(i,4,17,32)) = prob0e(i);
 end
 for i = 33:48
-    prob1c(boundadd(i,4,33,48)) = prob0d(i);
+    prob1e(boundadd(i,4,33,48)) = prob0e(i);
 end
 for i = 49:56
-    prob1c(boundadd(i,2,49,56)) = prob0d(i);
+    prob1e(boundadd(i,2,49,56)) = prob0e(i);
 end
 for i = 57:60
-    prob1c(boundadd(i,1,57,60)) = prob0d(i);
+    prob1e(boundadd(i,1,57,60)) = prob0e(i);
 end
 
-prob2b = zeros(60,1);
+prob2e = zeros(60,1);
 for i = 1:16
-    prob2b(boundadd(i,8,1,16)) = prob0d(i);
+    prob2e(boundadd(i,8,1,16)) = prob0e(i);
 end
 for i = 17:32
-    prob2b(boundadd(i,8,17,32)) = prob0d(i);
+    prob2e(boundadd(i,8,17,32)) = prob0e(i);
 end
 for i = 33:48
-    prob2b(boundadd(i,8,33,48)) = prob0d(i);
+    prob2e(boundadd(i,8,33,48)) = prob0e(i);
 end
 for i = 49:56
-    prob2b(boundadd(i,4,49,56)) = prob0d(i);
+    prob2e(boundadd(i,4,49,56)) = prob0e(i);
 end
 for i = 57:60
-    prob1c(boundadd(i,2,57,60)) = prob0d(i);
+    prob2e(boundadd(i,2,57,60)) = prob0e(i);
 end
 
-prob3a = zeros(60,1);
+prob3e = zeros(60,1);
 for i = 1:16
-    prob3a(boundadd(i,12,1,16)) = prob0d(i);
+    prob3e(boundadd(i,12,1,16)) = prob0e(i);
 end
 for i = 17:32
-    prob3a(boundadd(i,12,17,32)) = prob0d(i);
+    prob3e(boundadd(i,12,17,32)) = prob0e(i);
 end
 for i = 33:48
-    prob3a(boundadd(i,12,33,48)) = prob0d(i);
+    prob3e(boundadd(i,12,33,48)) = prob0e(i);
 end
 for i = 49:56
-    prob3a(boundadd(i,6,49,56)) = prob0d(i);
+    prob3e(boundadd(i,6,49,56)) = prob0e(i);
 end
 for i = 57:60
-    prob3a(boundadd(i,3,57,60)) = prob0d(i);
+    prob3e(boundadd(i,3,57,60)) = prob0e(i);
 end
 
-prob1b = zeros(60,1);
-for i = 1:16
-    prob1b(boundadd(i,4,1,16)) = prob0c(i);
-end
-for i = 17:32
-    prob1b(boundadd(i,4,17,32)) = prob0c(i);
-end
-for i = 33:48
-    prob1b(boundadd(i,4,33,48)) = prob0c(i);
-end
-for i = 49:56
-    prob1b(boundadd(i,2,49,56)) = prob0c(i);
-end
-for i = 57:60
-    prob1b(boundadd(i,1,57,60)) = prob0d(i);
-end
-
-prob2a = zeros(60,1);
-
-for i = 1:16
-    prob2a(boundadd(i,8,1,16)) = prob0c(i);
-end
-for i = 17:32
-    prob2a(boundadd(i,8,17,32)) = prob0c(i);
-end
-for i = 33:48
-    prob2a(boundadd(i,8,33,48)) = prob0c(i);
-end
-for i = 49:56
-    prob2a(boundadd(i,4,49,56)) = prob0c(i);
-end
-for i = 57:60
-    prob2a(boundadd(i,2,57,60)) = prob0c(i);
-end
-prob3d = zeros(60,1);
-
-for i = 1:16
-    prob3d(boundadd(i,12,1,16)) = prob0c(i);
-end
-for i = 17:32
-    prob3d(boundadd(i,12,17,32)) = prob0c(i);
-end
-for i = 33:48
-    prob3d(boundadd(i,12,33,48)) = prob0c(i);
-end
-for i = 49:56
-    prob3d(boundadd(i,6,49,56)) = prob0c(i);
-end
-for i = 57:60
-    prob3d(boundadd(i,3,57,60)) = prob0c(i);
-end
 
 sc = zeros(60,6);
 lines = axes;
@@ -317,8 +248,8 @@ rectangle(lines,'Position',pos3,'Curvature',[1 1])
 rectangle(lines,'Position',pos4,'Curvature',[1 1])
 hold(lines,"on")
 
-numbers = zeros(16,1);
-numbersbuff = zeros(16,10);
+numbers = zeros(20,1);
+numbersbuff = zeros(20,10);
 while 1
     
 
@@ -331,15 +262,16 @@ while 1
         numbers = numbersbuff(:,length(numbersbuff(1,:)));
     end
         
-    prob = -(prob0a.*numbers(1) + prob0b.*numbers(5) + prob3b.*numbers(8) + prob3c.*numbers(12)... 
-    + prob2c.*numbers(11)*0.8 + prob2d.*numbers(15)*0.8 + prob1d.*numbers(14) + prob1a.*numbers(2) ...
-    + prob0d.*numbers(13) + prob1c.*numbers(10) + prob2b.*numbers(7)*0.8 + prob3a.*numbers(4)...
-    + prob0c.*numbers(9) + prob1b.*numbers(6)*0.8 + prob2a.*numbers(3) + prob3d.*numbers(16));
+%     prob = -(prob0a.*numbers(1) + prob0b.*numbers(5) + prob3b.*numbers(8) + prob3c.*numbers(12)... 
+%     + prob2c.*numbers(11)*0.8 + prob2d.*numbers(15)*0.8 + prob1d.*numbers(14) + prob1a.*numbers(2) ...
+%     + prob0d.*numbers(13) + prob1c.*numbers(10) + prob2b.*numbers(7)*0.8 + prob3a.*numbers(4)...
+%     + prob0c.*numbers(9) + prob1b.*numbers(6)*0.8 + prob2a.*numbers(3) + prob3d.*numbers(16));
 
-%    prob = -(prob0a.*numbers(1) + prob0b.*numbers(5) + prob3b.*numbers(8) + prob3c.*numbers(12)... 
-%    + prob2c.*numbers(11) + prob2d.*numbers(15) + prob1d.*numbers(14) + prob1a.*numbers(2));
+%      prob = -(prob0a.*numbers(1) + prob0b.*numbers(5) + prob3b.*numbers(8) + prob3c.*numbers(12)... 
+%      + prob2c.*numbers(11) + prob2d.*numbers(15) + prob1d.*numbers(14) + prob1a.*numbers(2) ...
+%      + prob0e.*numbers(17) + prob1e.*numbers(18) +prob2e.*numbers(19) + prob3e.*numbers(20));
 
-%     prob = -(prob0a.*numbers(1));
+    prob = prob0e.*numbers(17);
    
 
     angle = pi/8;
@@ -348,20 +280,18 @@ while 1
     t1 = [];
     sc(1,:)  = [(2.25)*cos(pi*1/16),(2.25)*sin(pi*1/16), max(prob(1)*2, 1), [min(prob(1),255), max(255 - prob(1),0) 0]/255];            
     for j = 0:2
-        for i = 1:16
-            if(i+j>0)
-                %t1 = [t1 text((2.25-j*rad)*cos(pi*1/16+i*angle),(2.25-j*rad)*sin(pi*1/16+i*angle),num2str(prob(j*16+i)))];
-                sc(j*16+i,:)  = [(2.25-j*rad)*cos(pi*1/16+i*angle) ,(2.25-j*rad)*sin(pi*1/16+i*angle), max(prob(j*16+i)*2, 1), [min(prob(j*16+i),255), max(255 - prob(j*16+i),0) 0]/255];
-            end
+        for i = 0:15
+            %t1 = [t1 text((2.25-j*rad)*cos(pi*1/16+i*angle),(2.25-j*rad)*sin(pi*1/16+i*angle),num2str(prob(j*16+i)))];
+            sc(j*16+i+1,:)  = [(2.25-j*rad)*cos(pi*1/16+i*angle) ,(2.25-j*rad)*sin(pi*1/16+i*angle), max(prob(j*16+i+1)*2, 1), [min(prob(j*16+i+1),255), max(255 - prob(j*16+i+1),0) 0]/255];
         end
     end
     for i = 0:7
             %t1 = [t1 text((0.75)*cos(pi*1/8+i*2*angle),(0.75)*sin(pi*1/8+i*2*angle),num2str(prob(48+i)))];
-            sc(49+i,:) = [(0.75)*cos(pi*1/8+i*2*angle) ,(0.75)*sin(pi*1/8+i*2*angle),max(prob(48+i)*2,1),[min(prob(48+i),255) max(255 - prob(48+i),0) 0]/255];
+            sc(49+i,:) = [(0.75)*cos(pi*1/8+i*2*angle) ,(0.75)*sin(pi*1/8+i*2*angle),max(prob(48+i+1)*2,1),[min(prob(48+i+1),255) max(255 - prob(48+i+1),0) 0]/255];
     end
     for i = 0:3 
             %t1 = [t1 text((0.25)*cos(pi*1/4+i*4*angle),(0.25)*sin(pi*1/4+i*4*angle),num2str(prob(56+i)))];
-            sc(57+i,:) = [(0.25)*cos(pi*1/4+i*4*angle) ,(0.25)*sin(pi*1/4+i*4*angle),max(prob(56+i)*2,1),[min(prob(56+i),255) max(255 - prob(56+i),0) 0]/255];
+            sc(57+i,:) = [(0.25)*cos(pi*1/4+i*4*angle) ,(0.25)*sin(pi*1/4+i*4*angle),max(prob(56+i+1)*2,1),[min(prob(56+i+1),255) max(255 - prob(56+i+1),0) 0]/255];
     end
    
     numbers;

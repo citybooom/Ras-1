@@ -1,7 +1,7 @@
 clear all
 
-s = serialport("COM3",9600);
-buffer = zeros(16,100);
+s = serialport("COM4",9600);
+buffer = zeros(4,100);
 fig4 = figure;
 tiledlayout(2,2)
 x = linspace(1,100,100);
