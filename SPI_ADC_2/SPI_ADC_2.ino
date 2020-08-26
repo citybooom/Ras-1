@@ -18,7 +18,7 @@ byte transmission2;
 byte data1;
 byte data2;
 byte expectedResp;
-unsigned long readings[8];
+double readings[8];
 unsigned long reading = 0;
 unsigned long tempdata1 = 0;
 unsigned long tempdata2 = 0;
@@ -38,7 +38,7 @@ void setup()
   pinMode(DATA_READY, INPUT);
   digitalWrite(RESET, HIGH);
   digitalWrite(SSpot, HIGH);
-  Serial.begin(250000);
+  Serial.begin(2000000);
 
   
   //Initialize SPI
@@ -153,7 +153,7 @@ void gatherData(){
     unsigned long tempdata2 = transferSPI(0b0000000);
     unsigned long tempdata3 = transferSPI(0b0000000);
     reading = (tempdata1 << 16) | (tempdata2 << 8) | tempdata3;
-    readings[i] = readings[i]*0.0 + reading*(1);
+    readings[i] = readings[i]*0.99 + reading*(0.01);
   }
    
     transferSPI(0b0000000);
