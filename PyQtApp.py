@@ -4,10 +4,10 @@ from PyQt5.QtWidgets import QApplication, QWidget, QShortcut
 from PyQt5.QtGui import QPainter, QPen, QColor, QKeySequence, QMouseEvent
 from PyQt5.QtCore import Qt, QTimer, QThread
 
-WIDTH = 10
+WIDTH = 30
 grid = []
 intense = 80
-points = [(10,10),(10,15),(18,30)]
+points = []
 xpos = 50
 ypos = 50
 
@@ -27,6 +27,7 @@ class Cell():
 class App(QWidget):
     def __init__(self):
         super().__init__()
+        self.pressed = 0
         self.left = 0
         self.top = 0
         self.width = 1400
@@ -49,15 +50,23 @@ class App(QWidget):
             intense = intense - 1
 
     def mousePressEvent (self, event):
-    	global xpos
-    	global ypos
-    	points.append([xpos,ypos])
-    	print (xpos)
+    	# global xpos
+    	# global ypos
+    	# points.append([xpos,ypos])
+    	self.pressed = 1
+    	#print (xpos)
+
+    def mouseReleaseEvent(self, event):
+    	print("realse")
+    	self.pressed = 0
+
 
     def findClosestPoint(self, i, j):
     	
     	global points
     	closestDist = 100000
+    	if not points:
+    		return None
     	closestPoint = points[0]
     	firstpoint = 1
     	for p in points:
@@ -69,6 +78,7 @@ class App(QWidget):
     			if (math.sqrt((p[0] - i)**2 + (p[1] - j)**2) < closestDist):
     				closestPoint = p
     				closestDist = math.sqrt((p[0] - i)**2 + (p[1] - j)**2)
+    	
     	return closestPoint
 
 
@@ -80,7 +90,10 @@ class App(QWidget):
             for j in range(self.rows):
                 for i in range(self.cols):
                     closestPoint = self.findClosestPoint(i,j)
-                    cell = Cell(i, j, min(255 , 255- (int(math.sqrt(abs(closestPoint[0]-i)**2 + abs(closestPoint[1]-j)**2)*(100-intense)))))
+                    if closestPoint is None:
+                        cell = Cell(i, j, 0)
+                    else:
+                        cell = Cell(i, j, min(255 , 255- (int(math.sqrt(abs(closestPoint[0]-i)**2 + abs(closestPoint[1]-j)**2)*(100-intense)))))
                     grid.append(cell)
             QTimer.singleShot(1, self.go)
 
@@ -94,11 +107,14 @@ class App(QWidget):
         current.currentCell = 1
         while True:
             self.update()
+
             x , y = (pyautogui.position())
             xpos = int(x / WIDTH)
             ypos = int(y / WIDTH)
             QApplication.processEvents()
             QThread.msleep(1)
+            if(self.pressed):
+                points.append([xpos,ypos])
             if(self.up == 0):
                 self.color = self.color + 1
                 if self.color == 255:
@@ -121,7 +137,8 @@ class App(QWidget):
     def paintEvent(self, e):
         for c in grid:
             closestPoint = self.findClosestPoint(c.i,c.j)
-            c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(closestPoint[0]-c.i)**2 + abs(closestPoint[1]-c.j)**2)*(100-intense)))))
+            if closestPoint is not None:
+            	c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(closestPoint[0]-c.i)**2 + abs(closestPoint[1]-c.j)**2)*(100-intense)))))
             self.draw_cell_manual(c)
 
 
