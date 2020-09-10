@@ -37,10 +37,11 @@ class App(QWidget):
 		super().__init__()
 		
 		self.state = 0
+		self.diffbuffer = []
 		self.data = [0,0,0,0,0,0,0,0]
 		self.databaseline = [0,0,0,0,0,0,0,0]
 		self.dataout = [1,1,1,1,1,1,1,1] 
-		self.first = 100
+		self.first = 10
 		self.ser = serial.Serial('COM4',timeout=5)
 		self.ser.baudrate = 115200
 		self.pressed = 0
@@ -125,13 +126,14 @@ class App(QWidget):
 		current = grid[0]
 		current.visited = 1
 		current.currentCell = 1
+		diff = 0
+		diffcounter = 0
 		while True:
 			self.update()
 			while(self.ser.read() != b's'):
 				pass
 			tdata = self.ser.read(63)
 			#print (type(tdata))
-			
 			charcounter = 0
 			tempdata = []
 			for character in tdata:
@@ -151,8 +153,8 @@ class App(QWidget):
 				print(self.data)		
 				print(self.point)
 			else:
-				self.dataout = [self.data[0]-self.databaseline[0],self.data[1]-self.databaseline[1],self.data[2]-self.databaseline[2],self.data[3]-self.databaseline[3], \
-				self.data[4]-self.databaseline[4],self.data[5]-self.databaseline[5],self.data[6]-self.databaseline[6],self.data[7]-self.databaseline[7]]
+				self.dataout = numpy.square([self.data[0]-self.databaseline[0],self.data[1]-self.databaseline[1],self.data[2]-self.databaseline[2],self.data[3]-self.databaseline[3], \
+				self.data[4]-self.databaseline[4],self.data[5]-self.databaseline[5],self.data[6]-self.databaseline[6],self.data[7]-self.databaseline[7]])
 				#self.databaseline = numpy.subtract(self.databaseline, numpy.multiply(numpy.subtract(self.databaseline,self.data),0.0));
 				if sum(self.dataout):
 					self.point = [(self.dataout[0]*self.cols*1/8+ self.dataout[1]*self.cols*3/8+ self.dataout[2]*self.cols*5/8+ self.dataout[3]*self.cols*7/8+ \
@@ -161,9 +163,31 @@ class App(QWidget):
 							   self.dataout[4]*self.rows*7/8+ self.dataout[5]*self.rows*7/8+ self.dataout[6]*self.rows*7/8+ self.dataout[7]*self.rows*7/8)/sum(numpy.absolute(self.dataout))]
 
 				self.centerPressure = Cell(int(self.point[0]),int(self.point[1]),sum(self.dataout))
-				print(self.databaseline)
-				print(self.data)		
-				print(self.point)
+				prevdiff = diff
+				diff = (sum((numpy.subtract(self.data,self.databaseline))))
+				#self.diffbuffer.append(diff)
+				# if(len(self.diffbuffer) > 10):
+				# 	self.diffbuffer.pop()
+				if(self.state == 0):
+					if(diff < 0.7):
+						self.databaseline = self.data.copy()
+					else:
+						self.state = 1
+				if(self.state == 1):
+					if(diff - prevdiff < -diff/70):
+						diffcounter = diffcounter + 1
+					elif diffcounter > 0:
+						diffcounter = diffcounter - 1
+					if diffcounter > 5 or diff < 0.7:
+						self.databaseline = self.data.copy()
+						self.state = 0
+				print(self.state)
+
+				print(diff)
+
+				# print(self.databaseline)
+				# print(self.data)		
+				# print(self.point)
 
 				#print(self.dataout)
 				#print(dataout)
@@ -201,19 +225,21 @@ class App(QWidget):
 		# for c in grid:
 		# 	closestPoint, number = self.findClosestPoint(c.i,c.j)
 		# 	if closestPoint is not None:
-		# 		c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(closestPoint[0]-c.i)**2 + abs(closestPoint[1]-c.j)**2)*(100-abs(self.dataout[number])*4)))))
+		# 		c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(closestPoint[0]-c.i)**2 + abs(closestPoint[1]-c.j)**2)*(100-(self.dataout[number])*4)))))
 		# 	self.draw_cell_manual(c)
 		# self.draw_cell_manual(self.centerPressure)
 
+		#Draw Pressure
+
 		for c in grid:
-			if(sum(self.dataout)):
+			if(sum(self.dataout) and self.state):
 				c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(self.centerPressure.i-c.i)**2 + abs(self.centerPressure.j-c.j)**2)*(60)))))
 			else:
 				c.intensity = 0
-
 			self.draw_cell_manual(c)
-		
-		self.draw_cell_manual(self.centerPressure)
+
+		if self.state:
+			self.draw_cell_manual(self.centerPressure)
 		#print(self.centerPressure.i)
 		#print(self.centerPressure.j)
 
@@ -234,7 +260,7 @@ class App(QWidget):
 		if cell.walls[3]:  # left
 			qp.drawLine(x    , y + WIDTH, x    , y)
 		forcecolor = self.centerPressure.intensity / 100
-		qp.setBrush(QColor(max(0,min(255,forcecolor*cell.intensity*self.centerPressure.intensity/5)), max(0,min(255,((1.0 - forcecolor) * cell.intensity*self.centerPressure.intensity/5))) , 0, 200))
+		qp.setBrush(QColor(max(0,min(255,forcecolor*cell.intensity*self.centerPressure.intensity/10)), max(0,min(255,((1.0 - forcecolor) * cell.intensity*self.centerPressure.intensity/10))) , 0, 200))
 		qp.drawRect(x, y, WIDTH, WIDTH)
 
 

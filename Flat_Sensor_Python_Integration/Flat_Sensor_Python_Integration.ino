@@ -82,7 +82,7 @@ void loop() {
   Serial.print(" ");
   Serial.print(c3out*0.125);
   Serial.print(" ");
-  Serial.print(c4out*0.125);
+  Serial.print(c4out*0.225);
   Serial.print(" ");
   Serial.print(c5out*0.125);
   Serial.print(" ");
