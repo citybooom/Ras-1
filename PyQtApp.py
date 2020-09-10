@@ -1,14 +1,15 @@
 import sys, math, random, queue, threading
 import pyautogui
 import serial
+import numpy	
 from PyQt5.QtWidgets import QApplication, QWidget, QShortcut
 from PyQt5.QtGui import QPainter, QPen, QColor, QKeySequence, QMouseEvent
 from PyQt5.QtCore import Qt, QTimer, QThread
 
-WIDTH = 30
+WIDTH = 40
 grid = []
 intense = 80
-points = []
+
 xpos = 50
 ypos = 50
 
@@ -25,15 +26,27 @@ class Cell():
 		else:
 			return i + j * cols
 
+class PressurePoint():
+	def __init__(self, i, j, intensity):
+		self.i = i
+		self.j = j
+		self.intensity = intensity
+
 class App(QWidget):
 	def __init__(self):
 		super().__init__()
+		
+		self.state = 0
 		self.data = [0,0,0,0,0,0,0,0]
+		self.databaseline = [0,0,0,0,0,0,0,0]
+		self.dataout = [1,1,1,1,1,1,1,1] 
+		self.first = 100
 		self.ser = serial.Serial('COM4',timeout=5)
 		self.ser.baudrate = 115200
 		self.pressed = 0
 		self.left = 0
 		self.top = 0
+		self.centerPressure = Cell(0,0,1)
 		self.width = 1400
 		self.height = 620
 		self.color = 0
@@ -42,6 +55,8 @@ class App(QWidget):
 		self.up = 0
 		self.cols = math.floor(self.width / WIDTH)
 		self.rows = math.floor(self.height / WIDTH)
+		self.points = [[self.cols*1/8,self.rows/4],[self.cols*3/8,self.rows/4],[self.cols*5/8,self.rows/4],[self.cols*7/8,self.rows/4],\
+		[self.cols*7/8,self.rows*3/4],[self.cols*5/8,self.rows*3/4],[self.cols*3/8,self.rows*3/4],[self.cols*1/8,self.rows*3/4]]
 		self.active = False
 		self.initui()
 		self.init_cells(self.point, intense)
@@ -54,25 +69,23 @@ class App(QWidget):
 			intense = intense - 1
 
 	def mousePressEvent (self, event):
-		# global xpos
-		# global ypos
-		# points.append([xpos,ypos])
-		self.pressed = 1
-		#print (xpos)
-
+		self.pressed = 0
+	
 	def mouseReleaseEvent(self, event):
 		self.pressed = 0
 
 
 	def findClosestPoint(self, i, j):
 		
-		global points
 		closestDist = 100000
-		if not points:
+		
+		if not self.points:
 			return None
-		closestPoint = points[0]
+		closestPoint = self.points[0].copy()
+		number = 0
+		closestnumber = 0
 		firstpoint = 1
-		for p in points:
+		for p in self.points:
 			if firstpoint == 1:
 				closestPoint = p
 				closestDist = math.sqrt((p[0] - i)**2 + (p[1] - j)**2)
@@ -81,8 +94,11 @@ class App(QWidget):
 				if (math.sqrt((p[0] - i)**2 + (p[1] - j)**2) < closestDist):
 					closestPoint = p
 					closestDist = math.sqrt((p[0] - i)**2 + (p[1] - j)**2)
-		
-		return closestPoint
+					closestnumber = number
+			number = number + 1
+		# print(closestPoint.copy())
+		return closestPoint.copy(), closestnumber
+
 
 
 		return
@@ -92,11 +108,11 @@ class App(QWidget):
 			del grid[:]
 			for j in range(self.rows):
 				for i in range(self.cols):
-					closestPoint = self.findClosestPoint(i,j)
+					closestPoint, number = self.findClosestPoint(i,j)
 					if closestPoint is None:
 						cell = Cell(i, j, 0)
 					else:
-						cell = Cell(i, j, min(255 , 255- (int(math.sqrt(abs(closestPoint[0]-i)**2 + abs(closestPoint[1]-j)**2)*(100-intense)))))
+						cell = Cell(i, j, min(255 , 255- (int(math.sqrt(abs(closestPoint[0]-i)**2 + abs(closestPoint[1]-j)**2)*(100-self.dataout[number])))))
 					grid.append(cell)
 			QTimer.singleShot(1, self.go)
 
@@ -110,27 +126,55 @@ class App(QWidget):
 		current.visited = 1
 		current.currentCell = 1
 		while True:
+			self.update()
 			while(self.ser.read() != b's'):
 				pass
-			tdata = self.ser.read(63)			
-			self.data[0] = (float(tdata[0:7].decode("utf-8")))
-			self.data[1] = (float(tdata[8:15].decode("utf-8")))
-			self.data[2] = (float(tdata[16:23].decode("utf-8")))
-			self.data[3] = (float(tdata[24:31].decode("utf-8")))
-			self.data[4] = (float(tdata[32:39].decode("utf-8")))
-			self.data[5] = (float(tdata[40:47].decode("utf-8")))
-			self.data[6] = (float(tdata[48:55].decode("utf-8")))
-			self.data[7] = (float(tdata[56:63].decode("utf-8")))
-			print(self.data)
+			tdata = self.ser.read(63)
+			#print (type(tdata))
+			
+			charcounter = 0
+			tempdata = []
+			for character in tdata:
+				if character != 32:
+					tempdata.append(character)
+				else:
+					self.data[charcounter] = float(bytes(tempdata).decode("utf-8"))
+					tempdata = []
+					charcounter = charcounter + 1
 
-			self.update()
+
+
+			if(self.first > 0):
+				self.databaseline = self.data.copy()
+				self.first = self.first - 1
+				print(self.databaseline)
+				print(self.data)		
+				print(self.point)
+			else:
+				self.dataout = [self.data[0]-self.databaseline[0],self.data[1]-self.databaseline[1],self.data[2]-self.databaseline[2],self.data[3]-self.databaseline[3], \
+				self.data[4]-self.databaseline[4],self.data[5]-self.databaseline[5],self.data[6]-self.databaseline[6],self.data[7]-self.databaseline[7]]
+				#self.databaseline = numpy.subtract(self.databaseline, numpy.multiply(numpy.subtract(self.databaseline,self.data),0.0));
+				if sum(self.dataout):
+					self.point = [(self.dataout[0]*self.cols*1/8+ self.dataout[1]*self.cols*3/8+ self.dataout[2]*self.cols*5/8+ self.dataout[3]*self.cols*7/8+ \
+							   self.dataout[4]*self.cols*7/8+ self.dataout[5]*self.cols*5/8+ self.dataout[6]*self.cols*3/8+ self.dataout[7]*self.cols*1/8)/sum(numpy.absolute(self.dataout)), \
+							   (self.dataout[0]*self.rows/8+ self.dataout[1]*self.rows/8+ self.dataout[2]*self.rows/8+ self.dataout[3]*self.rows/8+ \
+							   self.dataout[4]*self.rows*7/8+ self.dataout[5]*self.rows*7/8+ self.dataout[6]*self.rows*7/8+ self.dataout[7]*self.rows*7/8)/sum(numpy.absolute(self.dataout))]
+
+				self.centerPressure = Cell(int(self.point[0]),int(self.point[1]),sum(self.dataout))
+				print(self.databaseline)
+				print(self.data)		
+				print(self.point)
+
+				#print(self.dataout)
+				#print(dataout)
+
 			x , y = (pyautogui.position())
 			xpos = int(x / WIDTH)
 			ypos = int(y / WIDTH)
 			QApplication.processEvents()
-			QThread.msleep(1)
+			#QThread.msleep(1)
 			if(self.pressed):
-				points.append([xpos,ypos])
+				self.points.append([xpos,ypos])
 			if(self.up == 0):
 				self.color = self.color + 1
 				if self.color == 255:
@@ -151,11 +195,28 @@ class App(QWidget):
 		self.show()
 
 	def paintEvent(self, e):
+		
+		# Draw full grid
+
+		# for c in grid:
+		# 	closestPoint, number = self.findClosestPoint(c.i,c.j)
+		# 	if closestPoint is not None:
+		# 		c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(closestPoint[0]-c.i)**2 + abs(closestPoint[1]-c.j)**2)*(100-abs(self.dataout[number])*4)))))
+		# 	self.draw_cell_manual(c)
+		# self.draw_cell_manual(self.centerPressure)
+
 		for c in grid:
-			closestPoint = self.findClosestPoint(c.i,c.j)
-			if closestPoint is not None:
-				c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(closestPoint[0]-c.i)**2 + abs(closestPoint[1]-c.j)**2)*(100-intense)))))
+			if(sum(self.dataout)):
+				c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(self.centerPressure.i-c.i)**2 + abs(self.centerPressure.j-c.j)**2)*(100-self.centerPressure.intensity)))))
+			else:
+				c.intensity = 0
+
 			self.draw_cell_manual(c)
+		
+		self.draw_cell_manual(self.centerPressure)
+		#print(self.centerPressure.i)
+		#print(self.centerPressure.j)
+
 
 
 	def draw_cell_manual(self, cell):
@@ -173,7 +234,7 @@ class App(QWidget):
 		if cell.walls[3]:  # left
 			qp.drawLine(x    , y + WIDTH, x    , y)
 		forcecolor = intense / 100
-		qp.setBrush(QColor(max(0,min(255,forcecolor*cell.intensity)), max(0,min(255,((1.0 - forcecolor) * cell.intensity))) , 0, 200))
+		qp.setBrush(QColor(max(0,min(255,forcecolor*cell.intensity*4)), max(0,min(255,((1.0 - forcecolor) * cell.intensity*4))) , 0, 200))
 		qp.drawRect(x, y, WIDTH, WIDTH)
 
 
