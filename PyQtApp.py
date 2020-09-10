@@ -112,7 +112,7 @@ class App(QWidget):
 					if closestPoint is None:
 						cell = Cell(i, j, 0)
 					else:
-						cell = Cell(i, j, min(255 , 255- (int(math.sqrt(abs(closestPoint[0]-i)**2 + abs(closestPoint[1]-j)**2)*(100-self.dataout[number])))))
+						cell = Cell(i, j, min(255 , 255- (int(math.sqrt(abs(closestPoint[0]-i)**2 + abs(closestPoint[1]-j)**2)*(20)))))
 					grid.append(cell)
 			QTimer.singleShot(1, self.go)
 
@@ -207,7 +207,7 @@ class App(QWidget):
 
 		for c in grid:
 			if(sum(self.dataout)):
-				c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(self.centerPressure.i-c.i)**2 + abs(self.centerPressure.j-c.j)**2)*(100-self.centerPressure.intensity)))))
+				c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(self.centerPressure.i-c.i)**2 + abs(self.centerPressure.j-c.j)**2)*(60)))))
 			else:
 				c.intensity = 0
 
@@ -233,8 +233,8 @@ class App(QWidget):
 			qp.drawLine(x + WIDTH, y + WIDTH, x    , y + WIDTH)
 		if cell.walls[3]:  # left
 			qp.drawLine(x    , y + WIDTH, x    , y)
-		forcecolor = intense / 100
-		qp.setBrush(QColor(max(0,min(255,forcecolor*cell.intensity*4)), max(0,min(255,((1.0 - forcecolor) * cell.intensity*4))) , 0, 200))
+		forcecolor = self.centerPressure.intensity / 100
+		qp.setBrush(QColor(max(0,min(255,forcecolor*cell.intensity*self.centerPressure.intensity/5)), max(0,min(255,((1.0 - forcecolor) * cell.intensity*self.centerPressure.intensity/5))) , 0, 200))
 		qp.drawRect(x, y, WIDTH, WIDTH)
 
 
