@@ -1,10 +1,15 @@
-import sys, math, random, queue, threading
+import sys, math, random, queue, threading, time
 import pyautogui
 import serial
 import numpy	
 from PyQt5.QtWidgets import QApplication, QWidget, QShortcut
 from PyQt5.QtGui import QPainter, QPen, QColor, QKeySequence, QMouseEvent
 from PyQt5.QtCore import Qt, QTimer, QThread
+from scipy import zeros, signal, random, fft, arange
+import matplotlib.pyplot as plt
+from numpy import sin, linspace, pi
+from pylab import plot, show, title, xlabel, ylabel, subplot
+
 
 WIDTH = 40
 grid = []
@@ -12,6 +17,9 @@ intense = 80
 
 xpos = 50
 ypos = 50
+
+def Extract(lst, ele): 
+    return [item[ele] for item in lst]
 
 class Cell():
 	def __init__(self, i, j, intensity):
@@ -32,18 +40,37 @@ class PressurePoint():
 		self.j = j
 		self.intensity = intensity
 
+def plotSpectrum(y,Fs):
+ """
+ Plots a Single-Sided Amplitude Spectrum of y(t)
+ """
+ n = len(y) # length of the signal
+ k = arange(n)
+ T = n/Fs
+ frq = k/T # two sides frequency range
+ frq = frq[range(int(n/2))] # one side frequency range
+
+ Y = fft(y)/n # fft computing and normalization
+ Y = Y[range(int(n/2))]
+ 
+ plot(frq,abs(Y)) # plotting the spectrum
+ xlabel('Freq (Hz)')
+ ylabel('|Y(freq)|')
+
 class App(QWidget):
 	def __init__(self):
 		super().__init__()
 		
+		self.data1mem = []
 		self.state = 0
 		self.diffbuffer = []
 		self.data = [0,0,0,0,0,0,0,0]
 		self.databaseline = [0,0,0,0,0,0,0,0]
 		self.dataout = [1,1,1,1,1,1,1,1] 
-		self.first = 10
+		self.datafiltered = [1,1,1,1,1,1,1,1] 
+		self.first = 100
 		self.ser = serial.Serial('COM4',timeout=5)
-		self.ser.baudrate = 115200
+		self.ser.baudrate = 2000000
 		self.pressed = 0
 		self.left = 0
 		self.top = 0
@@ -61,6 +88,18 @@ class App(QWidget):
 		self.active = False
 		self.initui()
 		self.init_cells(self.point, intense)
+
+		self.b, self.a = signal.butter(3, 3, fs=35)
+		self.z0 = signal.lfilter_zi(self.b, self.a)
+		self.z1 = signal.lfilter_zi(self.b, self.a)
+		self.z2 = signal.lfilter_zi(self.b, self.a)
+		self.z3 = signal.lfilter_zi(self.b, self.a)
+		self.z4 = signal.lfilter_zi(self.b, self.a)
+		self.z5 = signal.lfilter_zi(self.b, self.a)
+		self.z6 = signal.lfilter_zi(self.b, self.a)
+		self.z7 = signal.lfilter_zi(self.b, self.a)
+		self.d, self.c = signal.butter(20, 3, fs=35)
+		self.y = signal.lfilter_zi(self.d, self.c)
 
 	def keyPressEvent(self, event):
 		global intense
@@ -130,21 +169,31 @@ class App(QWidget):
 		diffcounter = 0
 		while True:
 			self.update()
-			while(self.ser.read() != b's'):
+			print(time.time())
+			while(self.ser.read() != b'k'):
 				pass
+			self.ser.read()
+					
 			tdata = self.ser.read(63)
-			#print (type(tdata))
+			#print (tdata)
 			charcounter = 0
 			tempdata = []
 			for character in tdata:
+				if charcounter == 92:
+					self.data[charcounter] = float(bytes(tempdata).decode("utf-8"))
+					break
 				if character != 32:
 					tempdata.append(character)
 				else:
+					if(not tempdata):
+						continue
+					if charcounter == 8:
+						break	
 					self.data[charcounter] = float(bytes(tempdata).decode("utf-8"))
 					tempdata = []
 					charcounter = charcounter + 1
-
-
+					
+					
 
 			if(self.first > 0):
 				self.databaseline = self.data.copy()
@@ -152,49 +201,100 @@ class App(QWidget):
 				print(self.databaseline)
 				print(self.data)		
 				print(self.point)
+
 			else:
 				self.dataout = numpy.square([self.data[0]-self.databaseline[0],self.data[1]-self.databaseline[1],self.data[2]-self.databaseline[2],self.data[3]-self.databaseline[3], \
 				self.data[4]-self.databaseline[4],self.data[5]-self.databaseline[5],self.data[6]-self.databaseline[6],self.data[7]-self.databaseline[7]])
-				#self.databaseline = numpy.subtract(self.databaseline, numpy.multiply(numpy.subtract(self.databaseline,self.data),0.0));
-				if sum(self.dataout):
-					self.point = [(self.dataout[0]*self.cols*1/8+ self.dataout[1]*self.cols*3/8+ self.dataout[2]*self.cols*5/8+ self.dataout[3]*self.cols*7/8+ \
-							   self.dataout[4]*self.cols*7/8+ self.dataout[5]*self.cols*5/8+ self.dataout[6]*self.cols*3/8+ self.dataout[7]*self.cols*1/8)/sum(numpy.absolute(self.dataout)), \
-							   (self.dataout[0]*self.rows/8+ self.dataout[1]*self.rows/8+ self.dataout[2]*self.rows/8+ self.dataout[3]*self.rows/8+ \
-							   self.dataout[4]*self.rows*7/8+ self.dataout[5]*self.rows*7/8+ self.dataout[6]*self.rows*7/8+ self.dataout[7]*self.rows*7/8)/sum(numpy.absolute(self.dataout))]
+				self.datafiltered[0], self.z0 = signal.lfilter(self.b, self.a, [self.dataout[0]], zi=self.z0)
+				self.datafiltered[1], self.z1 = signal.lfilter(self.b, self.a, [self.dataout[1]], zi=self.z1)
+				self.datafiltered[2], self.z2 = signal.lfilter(self.b, self.a, [self.dataout[2]], zi=self.z2)
+				self.datafiltered[3], self.z3 = signal.lfilter(self.b, self.a, [self.dataout[3]], zi=self.z3)
+				self.datafiltered[4], self.z4 = signal.lfilter(self.b, self.a, [self.dataout[4]], zi=self.z4)
+				self.datafiltered[5], self.z5 = signal.lfilter(self.b, self.a, [self.dataout[5]], zi=self.z5)
+				self.datafiltered[6], self.z6 = signal.lfilter(self.b, self.a, [self.dataout[6]], zi=self.z6)
+				self.datafiltered[7], self.z7 = signal.lfilter(self.b, self.a, [self.dataout[7]], zi=self.z7)
+				
 
-				self.centerPressure = Cell(int(self.point[0]),int(self.point[1]),sum(self.dataout))
+				self.datafiltered[0] = self.datafiltered[0][0]
+				self.datafiltered[1] = self.datafiltered[1][0]
+				self.datafiltered[2] = self.datafiltered[2][0]
+				self.datafiltered[3] = self.datafiltered[3][0]
+				self.datafiltered[4] = self.datafiltered[4][0]
+				self.datafiltered[5] = self.datafiltered[5][0]
+				self.datafiltered[6] = self.datafiltered[6][0]
+				self.datafiltered[7] = self.datafiltered[7][0]
+
+				#print (self.datafiltered[0])
+
+				self.data1mem.append(self.datafiltered.copy())
+				# print(((Extract(self.data1mem,0))))
+				# print(self.data1mem)
+				# Plot Freq Spectrum and peform  filter
+
+				if(len(self.data1mem) == 30000):
+
+					# result1 = zeros(len(self.data1mem))
+					# for i, x in enumerate(self.data1mem):
+					# 	result1[i], self.z = signal.lfilter(self.b, self.a, [x], zi=self.z)
+					# result2 = zeros(len(result1))
+					# for i, x in enumerate(self.data1mem):
+					# 	result2[i], self.y = signal.lfilter(self.d, self.c, [x], zi=self.y)
+					plt.plot(Extract(self.data1mem,0))
+					plt.plot(Extract(self.data1mem,1))
+					plt.plot(Extract(self.data1mem,2))
+					plt.plot(Extract(self.data1mem,3))
+					plt.plot(Extract(self.data1mem,4))
+					plt.plot(Extract(self.data1mem,5))
+					plt.plot(Extract(self.data1mem,6))
+					plt.plot(Extract(self.data1mem,7))
+					plotSpectrum(self.data1mem,17.6)
+					# plotSpectrum(result1[100:500],17.6)
+					# plotSpectrum(result1[100:500],17.6)
+					# plt.plot(result1)
+					# plt.plot(result2)
+					plt.show()
+				self.databaseline = numpy.subtract(self.databaseline, numpy.multiply(numpy.subtract(self.databaseline,self.data),0.0));
+				if sum(self.dataout):
+					self.point = [(self.datafiltered[0]*self.cols*1/8+ self.datafiltered[1]*self.cols*3/8+ self.datafiltered[2]*self.cols*5/8+ self.datafiltered[3]*self.cols*7/8+ \
+							   self.datafiltered[4]*self.cols*7/8+ self.datafiltered[5]*self.cols*5/8+ self.datafiltered[6]*self.cols*3/8+ self.datafiltered[7]*self.cols*1/8)/sum(numpy.absolute(self.datafiltered)), \
+							   (self.datafiltered[0]*self.rows/8+ self.datafiltered[1]*self.rows/8+ self.datafiltered[2]*self.rows/8+ self.datafiltered[3]*self.rows/8+ \
+							   self.datafiltered[4]*self.rows*7/8+ self.datafiltered[5]*self.rows*7/8+ self.datafiltered[6]*self.rows*7/8+ self.datafiltered[7]*self.rows*7/8)/sum(numpy.absolute(self.datafiltered))]
+
+				self.centerPressure = Cell(int(self.point[0]),int(self.point[1]),sum(numpy.square(self.datafiltered))/1000)
+
 				prevdiff = diff
 				diff = (sum((numpy.subtract(self.data,self.databaseline))))
-				#self.diffbuffer.append(diff)
-				# if(len(self.diffbuffer) > 10):
-				# 	self.diffbuffer.pop()
+				self.diffbuffer.append(diff)
+				if(len(self.diffbuffer) > 10):
+					self.diffbuffer.pop()
 				if(self.state == 0):
-					if(diff < 0.7):
+					if(diff < 0.1):
 						self.databaseline = self.data.copy()
 					else:
 						self.state = 1
 				if(self.state == 1):
-					if(diff - prevdiff < -diff/70):
+					if(diff - prevdiff < -diff/20):
 						diffcounter = diffcounter + 1
+						#print("diff")
 					elif diffcounter > 0:
 						diffcounter = diffcounter - 1
-					if diffcounter > 5 or diff < 0.7:
+					if diffcounter > 40 or diff < 0.1:
 						self.databaseline = self.data.copy()
 						self.state = 0
-				print(self.state)
+				# print(self.state)
 
-				print(diff)
+				# #print(diff)
 
 				# print(self.databaseline)
-				# print(self.data)		
-				# print(self.point)
-
+				# print(self.data)	
+				# print(self.dataout)
+				#print(self.datafiltered)	
+				print(self.point)
+				# print(sum(self.dataout))
 				#print(self.dataout)
 				#print(dataout)
 
-			x , y = (pyautogui.position())
-			xpos = int(x / WIDTH)
-			ypos = int(y / WIDTH)
+			
 			QApplication.processEvents()
 			#QThread.msleep(1)
 			if(self.pressed):
@@ -238,7 +338,7 @@ class App(QWidget):
 				c.intensity = 0
 			self.draw_cell_manual(c)
 
-		if self.state:
+		if self.state and self.centerPressure.intensity>5:
 			self.draw_cell_manual(self.centerPressure)
 		#print(self.centerPressure.i)
 		#print(self.centerPressure.j)
