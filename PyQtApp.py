@@ -278,7 +278,7 @@ class App(QWidget):
 						#print("diff")
 					elif diffcounter > 0:
 						diffcounter = diffcounter - 1
-					if diffcounter > 40 or diff < 0.1:
+					if diffcounter > 3 or diff < 0.1:
 						self.databaseline = self.data.copy()
 						self.state = 0
 				# print(self.state)
@@ -338,7 +338,7 @@ class App(QWidget):
 				c.intensity = 0
 			self.draw_cell_manual(c)
 
-		if self.state and self.centerPressure.intensity>5:
+		if self.state and self.centerPressure.intensity>0:
 			self.draw_cell_manual(self.centerPressure)
 		#print(self.centerPressure.i)
 		#print(self.centerPressure.j)
@@ -359,7 +359,7 @@ class App(QWidget):
 			qp.drawLine(x + WIDTH, y + WIDTH, x    , y + WIDTH)
 		if cell.walls[3]:  # left
 			qp.drawLine(x    , y + WIDTH, x    , y)
-		forcecolor = self.centerPressure.intensity / 100
+		forcecolor = self.centerPressure.intensity / 5
 		qp.setBrush(QColor(max(0,min(255,forcecolor*cell.intensity*self.centerPressure.intensity/10)), max(0,min(255,((1.0 - forcecolor) * cell.intensity*self.centerPressure.intensity/10))) , 0, 200))
 		qp.drawRect(x, y, WIDTH, WIDTH)
 
