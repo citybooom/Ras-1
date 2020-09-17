@@ -338,7 +338,7 @@ class App(QWidget):
 				c.intensity = 0
 			self.draw_cell_manual(c)
 
-		if self.state and self.centerPressure.intensity>0:
+		if self.state and self.centerPressure.intensity>1:
 			self.draw_cell_manual(self.centerPressure)
 		#print(self.centerPressure.i)
 		#print(self.centerPressure.j)
