@@ -11,7 +11,7 @@ from numpy import sin, linspace, pi
 from pylab import plot, show, title, xlabel, ylabel, subplot
 
 
-WIDTH = 40
+WIDTH = 50
 grid = []
 intense = 80
 
@@ -171,10 +171,6 @@ class App(QWidget):
 		global ypos
 
 		self.active = True
-
-		current = grid[0]
-		current.visited = 1
-		current.currentCell = 1
 		diff = 0
 		diffcounter = 0
 		while True:
@@ -368,10 +364,15 @@ class App(QWidget):
 
 		for c in grid:
 			if(sum(self.dataout) and self.state):
-				c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(self.centerPressure.i-c.i)**2 + abs(self.centerPressure.j-c.j)**2)*(60)))))
+				#c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(self.centerPressure.i-c.i)**2 + abs(self.centerPressure.j-c.j)**2)*(60)))))
+				for ele in self.midpoints:
+					c.intensity = min(255 , c.intensity + min(255 , int((1/(1+(math.sqrt(abs(ele.i-c.i)**2 + abs(ele.j-c.j)**2)))/10*(ele.intensity)))))
+					#print((int(10/(1+(math.sqrt(abs(ele.i-c.i)**2 + abs(ele.j-c.j)**2)*(ele.intensity))))))
+					#c.intensity = 255
+
 			else:
 				c.intensity = 0
-			self.draw_cell_manual(c)
+			self.draw_single_cell(c)
 
 		if self.state and self.centerPressure.intensity>1:
 			self.draw_single_cell(self.centerPressure)
@@ -450,11 +451,6 @@ class App(QWidget):
 			qp.drawLine(x + WIDTH, y + WIDTH, x    , y + WIDTH)
 		if cell.walls[3]:  # left
 			qp.drawLine(x    , y + WIDTH, x    , y)
-		if cell.visited:
-			if cell.currentCell:
-				qp.setBrush(QColor(0, 0 , 255, 100))
-			else:
-				qp.setBrush(QColor(255, 0, 255, 100))
 			qp.drawRect(x, y, WIDTH, WIDTH)
 
 
