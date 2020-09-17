@@ -33,6 +33,8 @@ class Cell():
 			return None
 		else:
 			return i + j * cols
+	def __str__(self):
+		return("Cell at x:" + str(self.i) + " y:" + str(self.j) + " intensity: " + str(self.intensity))
 
 class PressurePoint():
 	def __init__(self, i, j, intensity):
@@ -61,6 +63,7 @@ class App(QWidget):
 	def __init__(self):
 		super().__init__()
 		
+		self.time = 0
 		self.data1mem = []
 		self.state = 0
 		self.diffbuffer = []
@@ -89,6 +92,8 @@ class App(QWidget):
 		self.initui()
 		self.init_cells(self.point, intense)
 
+		# Filter Coeficients
+
 		self.b, self.a = signal.butter(3, 3, fs=35)
 		self.z0 = signal.lfilter_zi(self.b, self.a)
 		self.z1 = signal.lfilter_zi(self.b, self.a)
@@ -100,6 +105,11 @@ class App(QWidget):
 		self.z7 = signal.lfilter_zi(self.b, self.a)
 		self.d, self.c = signal.butter(20, 3, fs=35)
 		self.y = signal.lfilter_zi(self.d, self.c)
+
+		# Midpoints
+
+		self.midpoints = [None]*16
+
 
 	def keyPressEvent(self, event):
 		global intense
@@ -169,7 +179,11 @@ class App(QWidget):
 		diffcounter = 0
 		while True:
 			self.update()
-			print(time.time())
+
+			temptime = time.time()
+			hz = 1/(temptime - self.time)
+			self.time = temptime
+			#print(str(hz) + " Hz")
 			while(self.ser.read() != b'k'):
 				pass
 			self.ser.read()
@@ -260,6 +274,27 @@ class App(QWidget):
 							   (self.datafiltered[0]*self.rows/8+ self.datafiltered[1]*self.rows/8+ self.datafiltered[2]*self.rows/8+ self.datafiltered[3]*self.rows/8+ \
 							   self.datafiltered[4]*self.rows*7/8+ self.datafiltered[5]*self.rows*7/8+ self.datafiltered[6]*self.rows*7/8+ self.datafiltered[7]*self.rows*7/8)/sum(numpy.absolute(self.datafiltered))]
 
+					# Generate Midpoints
+					self.midpoints[0] = Cell(int((self.datafiltered[0]*self.cols*1/8 + self.datafiltered[1]*self.cols*3/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[1]))),int(self.rows/8),(self.datafiltered[0])+(self.datafiltered[1])/10)
+					self.midpoints[1] = Cell(int((self.datafiltered[1]*self.cols*3/8 + self.datafiltered[2]*self.cols*5/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[2]))),int(self.rows/8),(self.datafiltered[1])+(self.datafiltered[2])/10)
+					self.midpoints[2] = Cell(int((self.datafiltered[2]*self.cols*5/8 + self.datafiltered[3]*self.cols*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[3]))),int(self.rows/8),(self.datafiltered[2])+(self.datafiltered[3])/10)
+
+					self.midpoints[3] = Cell(int((self.datafiltered[4]*self.cols*7/8 + self.datafiltered[5]*self.cols*5/8)/(abs(self.datafiltered[4])+abs(self.datafiltered[5]))),int(self.rows*7/8),(self.datafiltered[4])+(self.datafiltered[5])/10)
+					self.midpoints[4] = Cell(int((self.datafiltered[5]*self.cols*5/8 + self.datafiltered[6]*self.cols*3/8)/(abs(self.datafiltered[5])+abs(self.datafiltered[6]))),int(self.rows*7/8),(self.datafiltered[5])+(self.datafiltered[6])/10)
+					self.midpoints[5] = Cell(int((self.datafiltered[6]*self.cols*3/8 + self.datafiltered[7]*self.cols*1/8)/(abs(self.datafiltered[6])+abs(self.datafiltered[7]))),int(self.rows*7/8),(self.datafiltered[6])+(self.datafiltered[7])/10)
+
+					self.midpoints[6] = Cell(int(self.cols/8),int((self.datafiltered[0]*self.rows*1/8 + self.datafiltered[7]*self.rows*7/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[7]))),(self.datafiltered[0])+(self.datafiltered[7]))
+					self.midpoints[7] = Cell(int(self.cols*3/8),int((self.datafiltered[1]*self.rows*1/8 + self.datafiltered[6]*self.rows*7/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[6]))),(self.datafiltered[1])+(self.datafiltered[6]))
+					self.midpoints[8] = Cell(int(self.cols*5/8),int((self.datafiltered[2]*self.rows*1/8 + self.datafiltered[5]*self.rows*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[5]))),(self.datafiltered[2])+(self.datafiltered[5]))
+					self.midpoints[9] = Cell(int(self.cols*7/8),int((self.datafiltered[3]*self.rows*1/8 + self.datafiltered[4]*self.rows*7/8)/(abs(self.datafiltered[3])+abs(self.datafiltered[4]))),(self.datafiltered[3])+(self.datafiltered[4]))
+
+					self.midpoints[10] = Cell(int((self.datafiltered[0]*self.cols*1/8 + self.datafiltered[6]*self.cols*3/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[6]))),int((self.datafiltered[0]*self.rows*1/8 + self.datafiltered[6]*self.rows*7/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[6]))),(self.datafiltered[0])+(self.datafiltered[6]))
+					self.midpoints[11] = Cell(int((self.datafiltered[1]*self.cols*3/8 + self.datafiltered[7]*self.cols*1/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[7]))),int((self.datafiltered[1]*self.rows*1/8 + self.datafiltered[7]*self.rows*7/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[7]))),(self.datafiltered[1])+(self.datafiltered[7]))
+					self.midpoints[12] = Cell(int((self.datafiltered[2]*self.cols*5/8 + self.datafiltered[6]*self.cols*3/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[6]))),int((self.datafiltered[2]*self.rows*1/8 + self.datafiltered[6]*self.rows*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[6]))),(self.datafiltered[2])+(self.datafiltered[6]))
+					self.midpoints[13] = Cell(int((self.datafiltered[1]*self.cols*3/8 + self.datafiltered[5]*self.cols*5/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[5]))),int((self.datafiltered[1]*self.rows*1/8 + self.datafiltered[5]*self.rows*7/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[5]))),(self.datafiltered[1])+(self.datafiltered[5]))
+					self.midpoints[14] = Cell(int((self.datafiltered[2]*self.cols*5/8 + self.datafiltered[4]*self.cols*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[4]))),int((self.datafiltered[2]*self.rows*1/8 + self.datafiltered[4]*self.rows*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[4]))),(self.datafiltered[2])+(self.datafiltered[4]))
+					self.midpoints[15] = Cell(int((self.datafiltered[3]*self.cols*7/8 + self.datafiltered[5]*self.cols*5/8)/(abs(self.datafiltered[3])+abs(self.datafiltered[5]))),int((self.datafiltered[3]*self.rows*1/8 + self.datafiltered[5]*self.rows*7/8)/(abs(self.datafiltered[3])+abs(self.datafiltered[5]))),(self.datafiltered[3])+(self.datafiltered[5]))
+					
 				self.centerPressure = Cell(int(self.point[0]),int(self.point[1]),sum(numpy.square(self.datafiltered))/1000)
 
 				prevdiff = diff
@@ -289,7 +324,7 @@ class App(QWidget):
 				# print(self.data)	
 				# print(self.dataout)
 				#print(self.datafiltered)	
-				print(self.point)
+				print(str(self.midpoints[0]))
 				# print(sum(self.dataout))
 				#print(self.dataout)
 				#print(dataout)
@@ -339,7 +374,26 @@ class App(QWidget):
 			self.draw_cell_manual(c)
 
 		if self.state and self.centerPressure.intensity>1:
-			self.draw_cell_manual(self.centerPressure)
+			self.draw_single_cell(self.centerPressure)
+			self.draw_single_cell(self.midpoints[0])
+			self.draw_single_cell(self.midpoints[1])
+			self.draw_single_cell(self.midpoints[2])
+			self.draw_single_cell(self.midpoints[3])
+			self.draw_single_cell(self.midpoints[4])
+			self.draw_single_cell(self.midpoints[5])
+
+			self.draw_single_cell(self.midpoints[6])
+			self.draw_single_cell(self.midpoints[7])
+			self.draw_single_cell(self.midpoints[8])
+			self.draw_single_cell(self.midpoints[9])
+
+			self.draw_single_cell(self.midpoints[10])
+			self.draw_single_cell(self.midpoints[11])
+			self.draw_single_cell(self.midpoints[12])
+			self.draw_single_cell(self.midpoints[13])
+			self.draw_single_cell(self.midpoints[14])
+			self.draw_single_cell(self.midpoints[15])
+
 		#print(self.centerPressure.i)
 		#print(self.centerPressure.j)
 
@@ -361,6 +415,24 @@ class App(QWidget):
 			qp.drawLine(x    , y + WIDTH, x    , y)
 		forcecolor = self.centerPressure.intensity / 5
 		qp.setBrush(QColor(max(0,min(255,forcecolor*cell.intensity*self.centerPressure.intensity/10)), max(0,min(255,((1.0 - forcecolor) * cell.intensity*self.centerPressure.intensity/10))) , 0, 200))
+		qp.drawRect(x, y, WIDTH, WIDTH)
+
+	def draw_single_cell(self, cell):
+		x = cell.i * WIDTH
+		y = cell.j * WIDTH
+		# LINES
+		qp = QPainter(self)
+		qp.setPen(QPen(Qt.black, 1, Qt.SolidLine))
+		if cell.walls[0]:  # top
+			qp.drawLine(x    , y    , x + WIDTH, y)
+		if cell.walls[1]:  # right
+			qp.drawLine(x + WIDTH, y    , x + WIDTH, y + WIDTH)
+		if cell.walls[2]:  # bottom
+			qp.drawLine(x + WIDTH, y + WIDTH, x    , y + WIDTH)
+		if cell.walls[3]:  # left
+			qp.drawLine(x    , y + WIDTH, x    , y)
+		forcecolor = 1
+		qp.setBrush(QColor(max(0,min(255,forcecolor*cell.intensity)), max(0,min(255,((1.0 - forcecolor) * cell.intensity))) , 0, 200))
 		qp.drawRect(x, y, WIDTH, WIDTH)
 
 
