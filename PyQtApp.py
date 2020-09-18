@@ -11,7 +11,7 @@ from numpy import sin, linspace, pi
 from pylab import plot, show, title, xlabel, ylabel, subplot
 
 
-WIDTH = 50
+WIDTH = 75
 grid = []
 intense = 80
 
@@ -177,9 +177,10 @@ class App(QWidget):
 			self.update()
 
 			temptime = time.time()
-			hz = 1/(temptime - self.time)
+			if (temptime > self.time):
+				hz = 1/(temptime - self.time)
 			self.time = temptime
-			#print(str(hz) + " Hz")
+			print(str(hz) + " Hz")
 			while(self.ser.read() != b'k'):
 				pass
 			self.ser.read()
@@ -271,30 +272,33 @@ class App(QWidget):
 							   self.datafiltered[4]*self.rows*7/8+ self.datafiltered[5]*self.rows*7/8+ self.datafiltered[6]*self.rows*7/8+ self.datafiltered[7]*self.rows*7/8)/sum(numpy.absolute(self.datafiltered))]
 
 					# Generate Midpoints
-					self.midpoints[0] = Cell(int((self.datafiltered[0]*self.cols*1/8 + self.datafiltered[1]*self.cols*3/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[1]))),int(self.rows/8),(self.datafiltered[0])+(self.datafiltered[1])/10)
-					self.midpoints[1] = Cell(int((self.datafiltered[1]*self.cols*3/8 + self.datafiltered[2]*self.cols*5/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[2]))),int(self.rows/8),(self.datafiltered[1])+(self.datafiltered[2])/10)
-					self.midpoints[2] = Cell(int((self.datafiltered[2]*self.cols*5/8 + self.datafiltered[3]*self.cols*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[3]))),int(self.rows/8),(self.datafiltered[2])+(self.datafiltered[3])/10)
 
-					self.midpoints[3] = Cell(int((self.datafiltered[4]*self.cols*7/8 + self.datafiltered[5]*self.cols*5/8)/(abs(self.datafiltered[4])+abs(self.datafiltered[5]))),int(self.rows*7/8),(self.datafiltered[4])+(self.datafiltered[5])/10)
-					self.midpoints[4] = Cell(int((self.datafiltered[5]*self.cols*5/8 + self.datafiltered[6]*self.cols*3/8)/(abs(self.datafiltered[5])+abs(self.datafiltered[6]))),int(self.rows*7/8),(self.datafiltered[5])+(self.datafiltered[6])/10)
-					self.midpoints[5] = Cell(int((self.datafiltered[6]*self.cols*3/8 + self.datafiltered[7]*self.cols*1/8)/(abs(self.datafiltered[6])+abs(self.datafiltered[7]))),int(self.rows*7/8),(self.datafiltered[6])+(self.datafiltered[7])/10)
+					k = 10
 
-					self.midpoints[6] = Cell(int(self.cols/8),int((self.datafiltered[0]*self.rows*1/8 + self.datafiltered[7]*self.rows*7/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[7]))),(self.datafiltered[0])+(self.datafiltered[7]))
-					self.midpoints[7] = Cell(int(self.cols*3/8),int((self.datafiltered[1]*self.rows*1/8 + self.datafiltered[6]*self.rows*7/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[6]))),(self.datafiltered[1])+(self.datafiltered[6]))
-					self.midpoints[8] = Cell(int(self.cols*5/8),int((self.datafiltered[2]*self.rows*1/8 + self.datafiltered[5]*self.rows*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[5]))),(self.datafiltered[2])+(self.datafiltered[5]))
-					self.midpoints[9] = Cell(int(self.cols*7/8),int((self.datafiltered[3]*self.rows*1/8 + self.datafiltered[4]*self.rows*7/8)/(abs(self.datafiltered[3])+abs(self.datafiltered[4]))),(self.datafiltered[3])+(self.datafiltered[4]))
+					self.midpoints[0] = Cell(int((self.datafiltered[0]*self.cols*1/8 + self.datafiltered[1]*self.cols*3/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[1]))),int(self.rows/8),((self.datafiltered[0])+(self.datafiltered[1]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+					self.midpoints[1] = Cell(int((self.datafiltered[1]*self.cols*3/8 + self.datafiltered[2]*self.cols*5/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[2]))),int(self.rows/8),((self.datafiltered[1])+(self.datafiltered[2]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+					self.midpoints[2] = Cell(int((self.datafiltered[2]*self.cols*5/8 + self.datafiltered[3]*self.cols*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[3]))),int(self.rows/8),((self.datafiltered[2])+(self.datafiltered[3]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
 
-					self.midpoints[10] = Cell(int((self.datafiltered[0]*self.cols*1/8 + self.datafiltered[6]*self.cols*3/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[6]))),int((self.datafiltered[0]*self.rows*1/8 + self.datafiltered[6]*self.rows*7/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[6]))),(self.datafiltered[0])+(self.datafiltered[6]))
-					self.midpoints[11] = Cell(int((self.datafiltered[1]*self.cols*3/8 + self.datafiltered[7]*self.cols*1/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[7]))),int((self.datafiltered[1]*self.rows*1/8 + self.datafiltered[7]*self.rows*7/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[7]))),(self.datafiltered[1])+(self.datafiltered[7]))
-					self.midpoints[12] = Cell(int((self.datafiltered[2]*self.cols*5/8 + self.datafiltered[6]*self.cols*3/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[6]))),int((self.datafiltered[2]*self.rows*1/8 + self.datafiltered[6]*self.rows*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[6]))),(self.datafiltered[2])+(self.datafiltered[6]))
-					self.midpoints[13] = Cell(int((self.datafiltered[1]*self.cols*3/8 + self.datafiltered[5]*self.cols*5/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[5]))),int((self.datafiltered[1]*self.rows*1/8 + self.datafiltered[5]*self.rows*7/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[5]))),(self.datafiltered[1])+(self.datafiltered[5]))
-					self.midpoints[14] = Cell(int((self.datafiltered[2]*self.cols*5/8 + self.datafiltered[4]*self.cols*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[4]))),int((self.datafiltered[2]*self.rows*1/8 + self.datafiltered[4]*self.rows*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[4]))),(self.datafiltered[2])+(self.datafiltered[4]))
-					self.midpoints[15] = Cell(int((self.datafiltered[3]*self.cols*7/8 + self.datafiltered[5]*self.cols*5/8)/(abs(self.datafiltered[3])+abs(self.datafiltered[5]))),int((self.datafiltered[3]*self.rows*1/8 + self.datafiltered[5]*self.rows*7/8)/(abs(self.datafiltered[3])+abs(self.datafiltered[5]))),(self.datafiltered[3])+(self.datafiltered[5]))
+					self.midpoints[3] = Cell(int((self.datafiltered[4]*self.cols*7/8 + self.datafiltered[5]*self.cols*5/8)/(abs(self.datafiltered[4])+abs(self.datafiltered[5]))),int(self.rows*7/8),((self.datafiltered[4])+(self.datafiltered[5]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+					self.midpoints[4] = Cell(int((self.datafiltered[5]*self.cols*5/8 + self.datafiltered[6]*self.cols*3/8)/(abs(self.datafiltered[5])+abs(self.datafiltered[6]))),int(self.rows*7/8),((self.datafiltered[5])+(self.datafiltered[6]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+					self.midpoints[5] = Cell(int((self.datafiltered[6]*self.cols*3/8 + self.datafiltered[7]*self.cols*1/8)/(abs(self.datafiltered[6])+abs(self.datafiltered[7]))),int(self.rows*7/8),((self.datafiltered[6])+(self.datafiltered[7]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+
+					self.midpoints[6] = Cell(int(self.cols/8),int((self.datafiltered[0]*self.rows*1/8 + self.datafiltered[7]*self.rows*7/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[7]))),((self.datafiltered[0])+(self.datafiltered[7]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+					self.midpoints[7] = Cell(int(self.cols*3/8),int((self.datafiltered[1]*self.rows*1/8 + self.datafiltered[6]*self.rows*7/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[6]))),((self.datafiltered[1])+(self.datafiltered[6]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+					self.midpoints[8] = Cell(int(self.cols*5/8),int((self.datafiltered[2]*self.rows*1/8 + self.datafiltered[5]*self.rows*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[5]))),((self.datafiltered[2])+(self.datafiltered[5]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+					self.midpoints[9] = Cell(int(self.cols*7/8),int((self.datafiltered[3]*self.rows*1/8 + self.datafiltered[4]*self.rows*7/8)/(abs(self.datafiltered[3])+abs(self.datafiltered[4]))),((self.datafiltered[3])+(self.datafiltered[4]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+
+					self.midpoints[10] = Cell(int((self.datafiltered[0]*self.cols*1/8 + self.datafiltered[6]*self.cols*3/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[6]))),int((self.datafiltered[0]*self.rows*1/8 + self.datafiltered[6]*self.rows*7/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[6]))),((self.datafiltered[0])+(self.datafiltered[6]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+					self.midpoints[11] = Cell(int((self.datafiltered[1]*self.cols*3/8 + self.datafiltered[7]*self.cols*1/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[7]))),int((self.datafiltered[1]*self.rows*1/8 + self.datafiltered[7]*self.rows*7/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[7]))),((self.datafiltered[1])+(self.datafiltered[7]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+					self.midpoints[12] = Cell(int((self.datafiltered[2]*self.cols*5/8 + self.datafiltered[6]*self.cols*3/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[6]))),int((self.datafiltered[2]*self.rows*1/8 + self.datafiltered[6]*self.rows*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[6]))),((self.datafiltered[2])+(self.datafiltered[6]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+					self.midpoints[13] = Cell(int((self.datafiltered[1]*self.cols*3/8 + self.datafiltered[5]*self.cols*5/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[5]))),int((self.datafiltered[1]*self.rows*1/8 + self.datafiltered[5]*self.rows*7/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[5]))),((self.datafiltered[1])+(self.datafiltered[5]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+					self.midpoints[14] = Cell(int((self.datafiltered[2]*self.cols*5/8 + self.datafiltered[4]*self.cols*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[4]))),int((self.datafiltered[2]*self.rows*1/8 + self.datafiltered[4]*self.rows*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[4]))),((self.datafiltered[2])+(self.datafiltered[4]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
+					self.midpoints[15] = Cell(int((self.datafiltered[3]*self.cols*7/8 + self.datafiltered[5]*self.cols*5/8)/(abs(self.datafiltered[3])+abs(self.datafiltered[5]))),int((self.datafiltered[3]*self.rows*1/8 + self.datafiltered[5]*self.rows*7/8)/(abs(self.datafiltered[3])+abs(self.datafiltered[5]))),((self.datafiltered[3])+(self.datafiltered[5]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
 					
 				self.centerPressure = Cell(int(self.point[0]),int(self.point[1]),sum(numpy.square(self.datafiltered))/1000)
 
 				prevdiff = diff
-				diff = (sum((numpy.subtract(self.data,self.databaseline))))
+				diff = (sum(numpy.absolute(self.datafiltered)))
 				self.diffbuffer.append(diff)
 				if(len(self.diffbuffer) > 10):
 					self.diffbuffer.pop()
@@ -309,7 +313,7 @@ class App(QWidget):
 						#print("diff")
 					elif diffcounter > 0:
 						diffcounter = diffcounter - 1
-					if diffcounter > 3 or diff < 0.1:
+					if diffcounter > 5 or diff < 0.1:
 						self.databaseline = self.data.copy()
 						self.state = 0
 				# print(self.state)
@@ -320,7 +324,7 @@ class App(QWidget):
 				# print(self.data)	
 				# print(self.dataout)
 				#print(self.datafiltered)	
-				print(str(self.midpoints[0]))
+				#print(str(self.midpoints[0]))
 				# print(sum(self.dataout))
 				#print(self.dataout)
 				#print(dataout)
@@ -361,12 +365,15 @@ class App(QWidget):
 		# self.draw_cell_manual(self.centerPressure)
 
 		#Draw Pressure
+		for c in grid:
+			c.intensity = 0
+
 
 		for c in grid:
 			if(sum(self.dataout) and self.state):
 				#c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(self.centerPressure.i-c.i)**2 + abs(self.centerPressure.j-c.j)**2)*(60)))))
 				for ele in self.midpoints:
-					c.intensity = min(255 , c.intensity + min(255 , int((1/(1+(math.sqrt(abs(ele.i-c.i)**2 + abs(ele.j-c.j)**2)))/10*(ele.intensity)))))
+					c.intensity = min(255 , c.intensity + min(255 , int((1/(1+((abs(ele.i-c.i)**2 + abs(ele.j-c.j)**2)))*2*(ele.intensity)))))
 					#print((int(10/(1+(math.sqrt(abs(ele.i-c.i)**2 + abs(ele.j-c.j)**2)*(ele.intensity))))))
 					#c.intensity = 255
 
@@ -374,27 +381,39 @@ class App(QWidget):
 				c.intensity = 0
 			self.draw_single_cell(c)
 
+		outputs = "outputs: "
+		if(self.midpoints[0]):
+			for midpoint in self.midpoints:
+				outputs = (outputs + str(midpoint.intensity) + " ")
+
+		print(outputs)
+
 		if self.state and self.centerPressure.intensity>1:
-			self.draw_single_cell(self.centerPressure)
-			self.draw_single_cell(self.midpoints[0])
-			self.draw_single_cell(self.midpoints[1])
-			self.draw_single_cell(self.midpoints[2])
-			self.draw_single_cell(self.midpoints[3])
-			self.draw_single_cell(self.midpoints[4])
-			self.draw_single_cell(self.midpoints[5])
+			# self.draw_single_cell(self.centerPressure)
+			# self.draw_single_cell(self.midpoints[0])
+			# self.draw_single_cell(self.midpoints[1])
+			# self.draw_single_cell(self.midpoints[2])
+			# self.draw_single_cell(self.midpoints[3])
+			# self.draw_single_cell(self.midpoints[4])
+			# self.draw_single_cell(self.midpoints[5])
 
-			self.draw_single_cell(self.midpoints[6])
-			self.draw_single_cell(self.midpoints[7])
-			self.draw_single_cell(self.midpoints[8])
-			self.draw_single_cell(self.midpoints[9])
+			# self.draw_single_cell(self.midpoints[6])
+			# self.draw_single_cell(self.midpoints[7])
+			# self.draw_single_cell(self.midpoints[8])
+			# self.draw_single_cell(self.midpoints[9])
 
-			self.draw_single_cell(self.midpoints[10])
-			self.draw_single_cell(self.midpoints[11])
-			self.draw_single_cell(self.midpoints[12])
-			self.draw_single_cell(self.midpoints[13])
-			self.draw_single_cell(self.midpoints[14])
-			self.draw_single_cell(self.midpoints[15])
-
+			# self.draw_single_cell(self.midpoints[10])
+			# self.draw_single_cell(self.midpoints[11])
+			# self.draw_single_cell(self.midpoints[12])
+			# self.draw_single_cell(self.midpoints[13])
+			# self.draw_single_cell(self.midpoints[14])
+			# self.draw_single_cell(self.midpoints[15])
+				
+			# outputs = "outputs: "
+			# for midpoint in self.midpoints:
+			# 	outputs = (outputs + str(midpoint.intensity) + " ")
+			# print(outputs)
+			pass
 		#print(self.centerPressure.i)
 		#print(self.centerPressure.j)
 
