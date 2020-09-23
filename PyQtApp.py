@@ -9,6 +9,8 @@ from scipy import zeros, signal, random, fft, arange
 import matplotlib.pyplot as plt
 from numpy import sin, linspace, pi
 from pylab import plot, show, title, xlabel, ylabel, subplot
+from sklearn.linear_model import LinearRegression
+
 
 
 WIDTH = 75
@@ -62,11 +64,13 @@ def plotSpectrum(y,Fs):
 class App(QWidget):
 	def __init__(self):
 		super().__init__()
-		
+		self.WLS = LinearRegression()
+		self.fitted = 0
 		self.time = 0
 		self.data1mem = []
 		self.state = 0
 		self.diffbuffer = []
+		self.totalforcebuffer = []
 		self.data = [0,0,0,0,0,0,0,0]
 		self.databaseline = [0,0,0,0,0,0,0,0]
 		self.dataout = [1,1,1,1,1,1,1,1] 
@@ -180,7 +184,7 @@ class App(QWidget):
 			if (temptime > self.time):
 				hz = 1/(temptime - self.time)
 			self.time = temptime
-			print(str(hz) + " Hz")
+			#print(str(hz) + " Hz")
 			while(self.ser.read() != b'k'):
 				pass
 			self.ser.read()
@@ -204,7 +208,7 @@ class App(QWidget):
 					tempdata = []
 					charcounter = charcounter + 1
 					
-					
+				
 
 			if(self.first > 0):
 				self.databaseline = self.data.copy()
@@ -235,34 +239,37 @@ class App(QWidget):
 				self.datafiltered[6] = self.datafiltered[6][0]
 				self.datafiltered[7] = self.datafiltered[7][0]
 
-				#print (self.datafiltered[0])
+				self.totalforcebuffer.append(sum(self.datafiltered))
+				print(self.datafiltered)
+				print(sum(numpy.sqrt(self.datafiltered)))
 
-				self.data1mem.append(self.datafiltered.copy())
+				self.data1mem.append(numpy.sqrt(self.datafiltered.copy()))
 				# print(((Extract(self.data1mem,0))))
 				# print(self.data1mem)
 				# Plot Freq Spectrum and peform  filter
 
-				if(len(self.data1mem) == 30000):
+				if(len(self.data1mem) == 1000):
 
 					# result1 = zeros(len(self.data1mem))
 					# for i, x in enumerate(self.data1mem):
 					# 	result1[i], self.z = signal.lfilter(self.b, self.a, [x], zi=self.z)
 					# result2 = zeros(len(result1))
 					# for i, x in enumerate(self.data1mem):
-					# 	result2[i], self.y = signal.lfilter(self.d, self.c, [x], zi=self.y)
-					plt.plot(Extract(self.data1mem,0))
-					plt.plot(Extract(self.data1mem,1))
-					plt.plot(Extract(self.data1mem,2))
-					plt.plot(Extract(self.data1mem,3))
-					plt.plot(Extract(self.data1mem,4))
-					plt.plot(Extract(self.data1mem,5))
-					plt.plot(Extract(self.data1mem,6))
-					plt.plot(Extract(self.data1mem,7))
-					plotSpectrum(self.data1mem,17.6)
+					# # 	result2[i], self.y = signal.lfilter(self.d, self.c, [x], zi=self.y)
+					# plt.plot(Extract(self.data1mem,0))
+					# plt.plot(Extract(self.data1mem,1))
+					# plt.plot(Extract(self.data1mem,2))
+					# plt.plot(Extract(self.data1mem,3))
+					# plt.plot(Extract(self.data1mem,4))
+					# plt.plot(Extract(self.data1mem,5))
+					# plt.plot(Extract(self.data1mem,6))
+					# plt.plot(Extract(self.data1mem,7))
+					#plotSpectrum(self.data1mem,35)
 					# plotSpectrum(result1[100:500],17.6)
 					# plotSpectrum(result1[100:500],17.6)
 					# plt.plot(result1)
 					# plt.plot(result2)
+					plt.plot(self.totalforcebuffer)
 					plt.show()
 				self.databaseline = numpy.subtract(self.databaseline, numpy.multiply(numpy.subtract(self.databaseline,self.data),0.0));
 				if sum(self.dataout):
@@ -273,7 +280,7 @@ class App(QWidget):
 
 					# Generate Midpoints
 
-					k = 10
+					k = 6
 
 					self.midpoints[0] = Cell(int((self.datafiltered[0]*self.cols*1/8 + self.datafiltered[1]*self.cols*3/8)/(abs(self.datafiltered[0])+abs(self.datafiltered[1]))),int(self.rows/8),((self.datafiltered[0])+(self.datafiltered[1]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
 					self.midpoints[1] = Cell(int((self.datafiltered[1]*self.cols*3/8 + self.datafiltered[2]*self.cols*5/8)/(abs(self.datafiltered[1])+abs(self.datafiltered[2]))),int(self.rows/8),((self.datafiltered[1])+(self.datafiltered[2]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
@@ -295,7 +302,31 @@ class App(QWidget):
 					self.midpoints[14] = Cell(int((self.datafiltered[2]*self.cols*5/8 + self.datafiltered[4]*self.cols*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[4]))),int((self.datafiltered[2]*self.rows*1/8 + self.datafiltered[4]*self.rows*7/8)/(abs(self.datafiltered[2])+abs(self.datafiltered[4]))),((self.datafiltered[2])+(self.datafiltered[4]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
 					self.midpoints[15] = Cell(int((self.datafiltered[3]*self.cols*7/8 + self.datafiltered[5]*self.cols*5/8)/(abs(self.datafiltered[3])+abs(self.datafiltered[5]))),int((self.datafiltered[3]*self.rows*1/8 + self.datafiltered[5]*self.rows*7/8)/(abs(self.datafiltered[3])+abs(self.datafiltered[5]))),((self.datafiltered[3])+(self.datafiltered[5]))/math.sqrt(sum(numpy.absolute(self.datafiltered)))*k)
 					
-				self.centerPressure = Cell(int(self.point[0]),int(self.point[1]),sum(numpy.square(self.datafiltered))/1000)
+
+					xpositions = numpy.empty([16,1])
+					ypositions = numpy.empty([16,1])
+					intensities = [None]*16
+					count = 0
+					for point in self.midpoints:
+						xpositions[count,0] = point.i
+						ypositions[count,0] = point.j
+						intensities[count] = abs(point.intensity)
+						count = count + 1
+						
+					#print(xpositions)
+
+					# print(xpositions)
+					# print(ypositions)
+					# print(intensities)
+
+					self.WLS.fit(numpy.asarray(xpositions), numpy.asarray(ypositions), sample_weight=intensities)
+
+					self.centerPressure = Cell(int(self.point[0]),int(self.point[1]),sum(numpy.square(self.datafiltered))/1000)
+
+					#print(self.WLS.coef_[0])
+					self.fitted = 1
+					
+
 
 				prevdiff = diff
 				diff = (sum(numpy.absolute(self.datafiltered)))
@@ -313,7 +344,7 @@ class App(QWidget):
 						#print("diff")
 					elif diffcounter > 0:
 						diffcounter = diffcounter - 1
-					if diffcounter > 5 or diff < 0.1:
+					if diffcounter > 20 or diff < 0.1:
 						self.databaseline = self.data.copy()
 						self.state = 0
 				# print(self.state)
@@ -363,7 +394,7 @@ class App(QWidget):
 		# 		c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(closestPoint[0]-c.i)**2 + abs(closestPoint[1]-c.j)**2)*(100-(self.dataout[number])*4)))))
 		# 	self.draw_cell_manual(c)
 		# self.draw_cell_manual(self.centerPressure)
-
+		# qp.drawLine(0    , 400    , 4, 400 + (WLS.coef_[0]*10))
 		#Draw Pressure
 		for c in grid:
 			c.intensity = 0
@@ -373,7 +404,8 @@ class App(QWidget):
 			if(sum(self.dataout) and self.state):
 				#c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(self.centerPressure.i-c.i)**2 + abs(self.centerPressure.j-c.j)**2)*(60)))))
 				for ele in self.midpoints:
-					c.intensity = min(255 , c.intensity + min(255 , int((1/(1+((abs(ele.i-c.i)**2 + abs(ele.j-c.j)**2)))*2*(ele.intensity)))))
+					pass
+					# c.intensity = min(255 , c.intensity + min(255 , int((1/(1+((abs(ele.i-c.i)**2 + abs(ele.j-c.j)**2)))*2*(ele.intensity)))))
 					#print((int(10/(1+(math.sqrt(abs(ele.i-c.i)**2 + abs(ele.j-c.j)**2)*(ele.intensity))))))
 					#c.intensity = 255
 
@@ -381,33 +413,35 @@ class App(QWidget):
 				c.intensity = 0
 			self.draw_single_cell(c)
 
+
+
 		outputs = "outputs: "
 		if(self.midpoints[0]):
 			for midpoint in self.midpoints:
 				outputs = (outputs + str(midpoint.intensity) + " ")
 
-		print(outputs)
+		# print(outputs)
 
-		if self.state and self.centerPressure.intensity>1:
-			# self.draw_single_cell(self.centerPressure)
-			# self.draw_single_cell(self.midpoints[0])
-			# self.draw_single_cell(self.midpoints[1])
-			# self.draw_single_cell(self.midpoints[2])
-			# self.draw_single_cell(self.midpoints[3])
-			# self.draw_single_cell(self.midpoints[4])
-			# self.draw_single_cell(self.midpoints[5])
+		if self.state and self.centerPressure.intensity>-10:
+			self.draw_single_cell(self.centerPressure)
+			self.draw_single_cell(self.midpoints[0])
+			self.draw_single_cell(self.midpoints[1])
+			self.draw_single_cell(self.midpoints[2])
+			self.draw_single_cell(self.midpoints[3])
+			self.draw_single_cell(self.midpoints[4])
+			self.draw_single_cell(self.midpoints[5])
 
-			# self.draw_single_cell(self.midpoints[6])
-			# self.draw_single_cell(self.midpoints[7])
-			# self.draw_single_cell(self.midpoints[8])
-			# self.draw_single_cell(self.midpoints[9])
+			self.draw_single_cell(self.midpoints[6])
+			self.draw_single_cell(self.midpoints[7])
+			self.draw_single_cell(self.midpoints[8])
+			self.draw_single_cell(self.midpoints[9])
 
-			# self.draw_single_cell(self.midpoints[10])
-			# self.draw_single_cell(self.midpoints[11])
-			# self.draw_single_cell(self.midpoints[12])
-			# self.draw_single_cell(self.midpoints[13])
-			# self.draw_single_cell(self.midpoints[14])
-			# self.draw_single_cell(self.midpoints[15])
+			self.draw_single_cell(self.midpoints[10])
+			self.draw_single_cell(self.midpoints[11])
+			self.draw_single_cell(self.midpoints[12])
+			self.draw_single_cell(self.midpoints[13])
+			self.draw_single_cell(self.midpoints[14])
+			self.draw_single_cell(self.midpoints[15])
 				
 			# outputs = "outputs: "
 			# for midpoint in self.midpoints:
@@ -416,6 +450,18 @@ class App(QWidget):
 			pass
 		#print(self.centerPressure.i)
 		#print(self.centerPressure.j)
+
+		if(self.fitted):
+			self.draw_line()
+
+
+	def draw_line(self):
+
+		qp = QPainter(self)
+		qp.setPen(QPen(Qt.green, 1, Qt.SolidLine))
+		slope = (self.WLS.coef_[0])
+		#print(slope[0])
+		qp.drawLine(self.centerPressure.i*WIDTH, self.centerPressure.j*WIDTH  , self.centerPressure.i*WIDTH + 200, self.centerPressure.j*WIDTH + int(200*slope[0]))
 
 
 
@@ -434,7 +480,7 @@ class App(QWidget):
 		if cell.walls[3]:  # left
 			qp.drawLine(x    , y + WIDTH, x    , y)
 		forcecolor = self.centerPressure.intensity / 5
-		qp.setBrush(QColor(max(0,min(255,forcecolor*cell.intensity*self.centerPressure.intensity/10)), max(0,min(255,((1.0 - forcecolor) * cell.intensity*self.centerPressure.intensity/10))) , 0, 200))
+		qp.setBrush(QColor(int(max(0,min(255,forcecolor*cell.intensity*self.centerPressure.intensity/10)), max(0,min(255,((1.0 - forcecolor) * cell.intensity*self.centerPressure.intensity/10))) , 0, 200)))
 		qp.drawRect(x, y, WIDTH, WIDTH)
 
 	def draw_single_cell(self, cell):
@@ -452,7 +498,7 @@ class App(QWidget):
 		if cell.walls[3]:  # left
 			qp.drawLine(x    , y + WIDTH, x    , y)
 		forcecolor = 1
-		qp.setBrush(QColor(max(0,min(255,forcecolor*cell.intensity)), max(0,min(255,((1.0 - forcecolor) * cell.intensity))) , 0, 200))
+		qp.setBrush(QColor(int(max(0,min(255,forcecolor*cell.intensity))), int(max(0,min(255,((1.0 - forcecolor) * cell.intensity)))) , 0, 200))
 		qp.drawRect(x, y, WIDTH, WIDTH)
 
 
