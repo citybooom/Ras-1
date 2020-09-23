@@ -1,7 +1,7 @@
 clear; 
 clc;
 
-fileID = fopen('Sensor8_Pos3_Take1.txt','r');
+fileID = fopen('Sensor9_Pos2_Take2.txt','r');
 formatSpec = '%f %f %f %f %f %f %f %f %f';
 A = textscan(fileID, formatSpec, 'Delimiter', {'*'});
 Data = cell2mat(A);
@@ -38,6 +38,9 @@ maxi = max(max(justTheData));
 slope = zeros(pulses,8);
 displacements = zeros(pulses,8);
 values = zeros(6,8);
+xspace = (1:1:300)';
+yfit = zeros(300,8);
+fits = cell(1,8);
 
 for i = 1:pulses
     for j = 1:8
@@ -45,10 +48,13 @@ for i = 1:pulses
         startpoint = center - 80;
         endpoint  = center + 80;
         slope(i,j) = (mean(justTheData(endpoint-5:endpoint+5,j)) - mean(justTheData(startpoint-5:startpoint+5,j)))/160;
-%         line([startpoint endpoint],[ mean(justTheData(startpoint-5:startpoint+5,j)) (mean(justTheData(endpoint-5:endpoint+5,j)))],'LineWidth',1)
-%         if i == 1 
+        line([startpoint endpoint],[ mean(justTheData(startpoint-5:startpoint+5,j)) (mean(justTheData(endpoint-5:endpoint+5,j)))],'LineWidth',1)
+        if i == 1 
+            yfit(:,j) = justTheData(1:300,j);
+            fits{j} = fit(xspace,yfit(:,j),'poly1');
+            plot((1:1:lineCount), fits{j}(1:1:lineCount));
 %             line([0 length(Data)],[ startvalues(j) startvalues(j) + slope(1,j)*length(Data)],'LineWidth',1)
-%         end
+        end
     end
     
 end
@@ -59,18 +65,24 @@ for i = 1:pulses
     end
 end
 
+fitvals = zeros(1,8);
+
 for i = 1:pulses
-%     line([167+333*(i-1) 167+333*(i-1)],[mini maxi],'LineWidth',1)   
-    value = mean(justTheData(167+333*(i-1)-5:167+333*(i-1)+5,:)) - (startvalues + displacements(i,:));
+    line([167+333*(i-1) 167+333*(i-1)],[mini maxi],'LineWidth',1) 
+    for j = 1:8
+        fitvals(j) = fits{j}(167+333*(i-1));
+    end
+    value = mean(justTheData(167+333*(i-1)-5:167+333*(i-1)+5,:)) - fitvals;
+%    value = mean(justTheData(167+333*(i-1)-5:167+333*(i-1)+5,:)) - (startvalues + displacements(i,:));
     values(i,:) = value;
 end
 
-xspace = (1:1:200)';
-yfit = justTheData(1:200,1);
-f1 = fit(xspace,yfit,'exp1');
 
-plot(xspace, f1(xspace));
 
+% 
+% f1 = fit(xspace,yfit,'poly2');
+% 
+% plot((1:1:lineCount), f1(1:1:lineCount));
 
 grid minor;
 lgd = legend("1", "2","3", "4", "5", "6", "7", "8");
@@ -86,4 +98,4 @@ for i = 0:2:pulses
     values(pulses-i,:) = [];
 end
 
-plot(values)
+plot(values,'LineWidth',1)

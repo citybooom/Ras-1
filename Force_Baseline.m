@@ -1,7 +1,7 @@
 clear; 
 clc;
 
-fileID = fopen('Sensor8_Pos3_Take1.txt','r');
+fileID = fopen('Sensor18_x7_y1.5.txt','r');
 formatSpec = '%f %f %f %f %f %f %f %f %f';
 A = textscan(fileID, formatSpec, 'Delimiter', {'*'});
 Data = cell2mat(A);
@@ -51,7 +51,7 @@ for i = 1:pulses
         line([startpoint endpoint],[ mean(justTheData(startpoint-5:startpoint+5,j)) (mean(justTheData(endpoint-5:endpoint+5,j)))],'LineWidth',1)
         if i == 1 
             yfit(:,j) = justTheData(1:300,j);
-            fits{j} = fit(xspace,yfit(:,j),'exp1');
+            fits{j} = fit(xspace,yfit(:,j),'poly1');
             plot((1:1:lineCount), fits{j}(1:1:lineCount));
 %             line([0 length(Data)],[ startvalues(j) startvalues(j) + slope(1,j)*length(Data)],'LineWidth',1)
         end
@@ -98,4 +98,4 @@ for i = 0:2:pulses
     values(pulses-i,:) = [];
 end
 
-plot(values)
+plot(values,'LineWidth',1)
