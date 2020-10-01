@@ -18,7 +18,7 @@ byte transmission2;
 byte data1;
 byte data2;
 byte expectedResp;
-double readings[8];
+unsigned long readings[8];
 unsigned long reading = 0;
 unsigned long tempdata1 = 0;
 unsigned long tempdata2 = 0;
@@ -27,6 +27,12 @@ byte res = 0;
 
 void setup()
 {
+  // set up Timer 1
+  pinMode (9, OUTPUT); 
+  TCCR1A = bit (COM1A0);  // toggle OC1A on Compare Match
+  TCCR1B = bit (WGM12) | bit (CS10);   // CTC, no prescaling
+  OCR1A =  0;       // output every cycle
+  
   
   //Set Pin Direction
   //Again, the other SPI pins are configured automatically
@@ -38,14 +44,14 @@ void setup()
   pinMode(DATA_READY, INPUT);
   digitalWrite(RESET, HIGH);
   digitalWrite(SSpot, HIGH);
-  Serial.begin(2000000);
+  Serial.begin(115200);
 
   
   //Initialize SPI
   SPI.begin();
-  //SPI.setDataMode(SPI_MODE1);
+  SPI.setDataMode(SPI_MODE1);
   SPI.setBitOrder(MSBFIRST);
-  SPI.setClockDivider(2);
+  SPI.setClockDivider(SPI_CLOCK_DIV2);
   digitalWrite(SSadc, HIGH);
   digitalWrite(RESET, LOW);
   delay(10);
@@ -62,13 +68,13 @@ void setup()
   
   //Serial.println("Begin Reset Attempt");
   byte packet = 0;
-  while(packet != 0b11111111){
-    bytecount = bytecount + 1;
-    packet = SPI.transfer(0);
-    }
+//  while(packet != 0b11111111){
+//    bytecount = bytecount + 1;
+//    packet = SPI.transfer(0);
+//    }
   if (SPI.transfer(0) == 0b00101000) {
     Serial.print("Reset successful in ");
-    Serial.print(bytecount);
+    Serial.print(bytecount,BIN);
     Serial.println(" cycles");
   }
   else{
@@ -113,7 +119,23 @@ void loop()
 
  
   gatherData();
-  Serial.println(readings[0]);
+  
+  Serial.print(readings[0]);
+  Serial.print(" ");
+  Serial.print(readings[1]);
+  Serial.print(" ");  
+  Serial.print(readings[2]);  
+  Serial.print(" ");
+  Serial.print(readings[3]);  
+  Serial.print(" ");
+  Serial.print(readings[4]);
+  Serial.print(" ");
+  Serial.print(readings[5]);
+  Serial.print(" ");
+  Serial.print(readings[6]);
+  Serial.print(" ");
+  Serial.print(readings[7]);
+  Serial.println(" ");
   //Serial.println(res);
   
 
@@ -153,7 +175,7 @@ void gatherData(){
     unsigned long tempdata2 = transferSPI(0b0000000);
     unsigned long tempdata3 = transferSPI(0b0000000);
     reading = (tempdata1 << 16) | (tempdata2 << 8) | tempdata3;
-    readings[i] = readings[i]*0.99 + reading*(0.01);
+    readings[i] = reading;
   }
    
     transferSPI(0b0000000);
