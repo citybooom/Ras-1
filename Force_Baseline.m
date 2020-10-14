@@ -1,5 +1,5 @@
 
-fileID = fopen('Sensor18_x7_y5.txt','r');
+fileID = fopen('Sensor32_x5_y8_Trial2.txt','r');
 formatSpec = '%f %f %f %f %f %f %f %f %f';
 A = textscan(fileID, formatSpec, 'Delimiter', {'*'});
 Data = cell2mat(A);
@@ -8,7 +8,7 @@ justTheData = Data(:,2:9);
 
 for i = 1:length(justTheData)
     for j = 1:length(justTheData(1))
-        justTheData(i,j) = -470*justTheData(i,j)/(justTheData(i,j) - 3300);
+        justTheData(i,j) = 47*(10*justTheData(i,j)-33)/(justTheData(i,j));
     end
 end
     
@@ -97,7 +97,7 @@ grid minor;
 lgd = legend("1", "2","3", "4", "5", "6", "7", "8");
 title(lgd, "Channel No.")
 ylabel('Voltage Reading (mV)')
-title('Force Baseline Test: Sensor15 Pos3 Take2')
+title('Sensor32_x5_y_Trial2')
 
 
 figure 

@@ -189,7 +189,7 @@ class App(QWidget):
 				pass
 			self.ser.read()
 					
-			tdata = self.ser.read(63)
+			tdata = self.ser.read(zz)
 			#print (tdata)
 			charcounter = 0
 			tempdata = []

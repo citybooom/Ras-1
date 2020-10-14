@@ -3,9 +3,9 @@
 
 files2read = cell(19,1);
 
-for c = 0.5:0.5:9.5
-    files2read{c*2} = strcat("Sensor18_x12_y", num2str(c));
-    files2read{c*2} = strcat(files2read{c*2},".txt");
+for c = 3.5:0.5:12.5
+    files2read{(c-3)*2} = strcat("Sensor32_x5_y", num2str(c));
+    files2read{(c-3)*2} = strcat(files2read{(c-3)*2},"_Trial1.txt");
 end
 
 finalslopes = zeros(8,length(files2read));
