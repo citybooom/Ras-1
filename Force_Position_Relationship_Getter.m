@@ -5,7 +5,7 @@ files2read = cell(19,1);
 
 for c = 3.5:0.5:12.5
     files2read{(c-3)*2} = strcat("Sensor32_x5_y", num2str(c));
-    files2read{(c-3)*2} = strcat(files2read{(c-3)*2},"_Trial1.txt");
+    files2read{(c-3)*2} = strcat(files2read{(c-3)*2},"_Trial2.txt");
 end
 
 finalslopes = zeros(8,length(files2read));
@@ -20,7 +20,7 @@ for k = 1:length(files2read)
     justTheData = Data(:,2:9);
     
     for i = 1:length(justTheData)
-        for j = 1:8
+        for j = 1:length(justTheData(1,:))
             justTheData(i,j) = -470*(justTheData(i,j) - 3300)/justTheData(i,j);
         end
     end

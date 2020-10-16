@@ -1,12 +1,11 @@
 
-fileID = fopen('Sensor32_x5_y9_Trial2.txt','r');
+fileID = fopen('Sensor32_x5_y_Trial2.txt','r');
 formatSpec = '%f %f %f %f %f %f %f %f %f';
 A = textscan(fileID, formatSpec, 'Delimiter', {'*'});
 Data = cell2mat(A);
 
 justTheData = Data(:,2:9);
-%justTheFiltered = lowpass(justTheData,0.01);
-justTheFiltered = justTheData;
+justTheFiltered = lowpass(justTheData,0.01);
 
 for i = 1:length(justTheData)
     for j = 1:length(justTheData(1,:))
