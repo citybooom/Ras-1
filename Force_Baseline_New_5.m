@@ -1,5 +1,5 @@
 
-fileID = fopen('SensorB2_x5_y12_Take3.txt','r');
+fileID = fopen('SensorB2_x5_y11_Take2B.txt','r');
 formatSpec = '%f %f %f %f %f %f %f %f %f';
 A = textscan(fileID, formatSpec, 'Delimiter', {'*'});
 Data = cell2mat(A);
@@ -43,8 +43,8 @@ end
 
 mini = min(min(justTheFiltered));
 maxi = max(max(justTheFiltered));
-slope = zeros(3,8);
-displacements = zeros(3,8);
+slope = zeros(5,8);
+displacements = zeros(5,8);
 values = zeros(6,8);
 xspace = [(100:1:300) (766:1:966) (1432:1:1632) (2100:1:2150)]';
 yfit = zeros(654,8);
@@ -70,18 +70,21 @@ plot(justTheFiltered)
 subplot(2,1,2);
 plot(common_noise)
 
-for i = 1:3
+for i = 1:5
     for j = 1:7
-        center = -20 + (400*(i));
+        center = -30 + (400*(i));
         startpoint = center - 100;
         endpoint  = center + 100;
         slope(i,j) = (mean(justTheFiltered(endpoint-10:endpoint+10,j)) - mean(justTheFiltered(startpoint-10:startpoint+10,j)));
     end
     
 end
-slope(1,:) = slope(1,:) / 200;
-slope(2,:) = slope(2,:) / 300;
-slope(3,:) = slope(3,:) / 500;
+slope(1,:) = slope(1,:) / 100;
+slope(2,:) = slope(2,:) / 200;
+slope(3,:) = slope(3,:) / 300;
+slope(4,:) = slope(4,:) / 400;
+slope(5,:) = slope(5,:) / 500;
+
 
 % 
 % hold on

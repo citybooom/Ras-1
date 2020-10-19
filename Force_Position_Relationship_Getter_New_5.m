@@ -1,14 +1,14 @@
 % clear; 
 % clc;
 
-files2read = cell(19,1);
+files2read = cell(10,1);
 
-for c = 3.5:0.5:12.5
-    files2read{(c-3)*2} = strcat("SensorB2_x5_y", num2str(c));
-    files2read{(c-3)*2} = strcat(files2read{(c-3)*2},"_Take3.txt");
+for c = 3:1:13
+    files2read{(c-2)} = strcat("SensorB2_x5_y", num2str(c));
+    files2read{(c-2)} = strcat(files2read{c-2},"_Take1B.txt");
 end
 
-slopearray = zeros(7,19);
+slopearray = zeros(7,10);
 finalslopes = zeros(8,length(files2read));
 
 for k = 1:length(files2read)
@@ -53,7 +53,7 @@ for k = 1:length(files2read)
 
     mini = min(min(justTheData));
     maxi = max(max(justTheData));
-    slope = zeros(3,7);
+    slope = zeros(5,7);
     displacements = zeros(pulses,8);
     values = zeros(6,8);
     xspace = [(100:1:300) (766:1:966) (1432:1:1632) (2100:1:2150)]';
@@ -81,7 +81,8 @@ for k = 1:length(files2read)
 %     subplot(2,1,2);
 %     plot(common_noise)
 
-    for i = 1:3
+    for i = 1:5
+        
         for j = 1:7
             center = -20 + (400*(i));
             startpoint = center - 100;
@@ -90,11 +91,13 @@ for k = 1:length(files2read)
         end
 
     end
-    slope(1,:) = slope(1,:) / 200;
-    slope(2,:) = slope(2,:) / 300;
-    slope(3,:) = slope(3,:) / 500;
+    slope(1,:) = slope(1,:) / 100;
+    slope(2,:) = slope(2,:) / 200;
+    slope(3,:) = slope(3,:) / 300;
+    slope(4,:) = slope(4,:) / 400;
+    slope(5,:) = slope(5,:) / 500;
     
-    slopechange =  (slope(3,:)); 
+    slopechange =  (slope(1,:)+slope(2,:)+slope(3,:)+slope(4,:)+slope(5,:))/5; 
     slopearray(:,k) = slopechange;
     
 
@@ -145,7 +148,7 @@ for k = 1:length(files2read)
 
 end
 % 
-%allslopes = allslopes + slopearray;5
+% allslopes = allslopes + slopearray;
 hold on
 plot(slopearray','LineWidth',1)
 % lgd = legend("1", "2","3", "4", "5", "6", "7", "8");
