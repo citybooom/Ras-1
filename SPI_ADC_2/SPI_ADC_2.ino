@@ -39,7 +39,7 @@ int chargingtimer = 10;
 
 byte res = 0;
 int first = 1;
-double EMA_a = 0.0005;    //initialization of EMA alpha
+double EMA_a = 0.0001;    //initialization of EMA alpha
 long EMA_S = 0;        //initialization of EMA S
 long highpass = 0;
 
@@ -173,7 +173,7 @@ void loop()
   }
   buffercounter = buffercounter + 1;
    
-  if(micros() - 100000 > timer){
+  if(micros() - 1000000 > timer){
     timer = micros();
 
     for (int i = 0; i < 8; i++){

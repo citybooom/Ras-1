@@ -34,7 +34,7 @@ long tempdata3 = 0;
 double j;
 long timer = 0;
 int buffercounter = 0;
-int chargingtimer = 10;
+int chargingtimer = 1;
 
 
 byte res = 0;
@@ -138,7 +138,7 @@ void loop()
   
   if (chargingtimer > 0) {
     for (int i = 0; i < 8; i++) {
-      firstreadings[i] = readings[i];
+      firstreadings[i] = 0;
     }
     chargingtimer = chargingtimer - 1;
   }
@@ -179,7 +179,7 @@ void loop()
     for (int i = 0; i < 8; i++){
       dataout[i] = dataout[i] / buffercounter;
     }
-
+    //delay(1000);
     Serial.print(millis()/1000.0);
     Serial.print("  ");
   

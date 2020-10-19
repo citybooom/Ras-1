@@ -131,11 +131,11 @@ while(1):
 		peakness = peakness * (abs((datamem[196,i]-datamem[195,i])) + abs((datamem[198,i]-datamem[199,i])))/100
 		i = i + 1
 
-	if (peakness > 1):
+	if (peakness > 100):
 		# bar, = ax.plot((197,197),(np.amin(datamem[197,:].copy()),np.amax(datamem[197,:].copy())))
 		# bars.append(bar)
 		
-		peakcounter = 5
+		peakcounter = 3
 		if(state == 0):
 			for i in range(0,8):
 				latchvalues[i] = datamem[196,i];
