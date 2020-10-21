@@ -32,9 +32,9 @@ long tempdata1 = 0;
 long tempdata2 = 0;
 long tempdata3 = 0;
 double j;
-long timer = 0;
+unsigned long timer = 0;
 int buffercounter = 0;
-int chargingtimer = 1;
+int chargingtimer = 2;
 
 
 byte res = 0;
@@ -117,7 +117,7 @@ void setup()
   digitalWrite(SSadc, LOW);
   writeDummyWord(10);
   digitalWrite(SSadc, HIGH);
-  timer = micros();
+  timer = millis();
 }
 
 void loop()
@@ -138,7 +138,7 @@ void loop()
   
   if (chargingtimer > 0) {
     for (int i = 0; i < 8; i++) {
-      firstreadings[i] = 0;
+      firstreadings[i] = readings[i];
     }
     chargingtimer = chargingtimer - 1;
   }
@@ -172,16 +172,16 @@ void loop()
     }
   }
   buffercounter = buffercounter + 1;
-   
-  if(micros() - 50000 > timer){
-    timer = micros();
+  while(millis() > 30000){} 
+  if(millis() - 20 > timer){
+    timer = millis();
 
     for (int i = 0; i < 8; i++){
-      dataout[i] = dataout[i] / buffercounter;
+      dataout[i] = readings[i];
     }
     //delay(1000);
-    Serial.print(millis()/1000.0);
-    Serial.print("  ");
+//    Serial.print(millis()/1000.0);
+//    Serial.print("  ");
   
     for (int i = 0; i < 8; i++) {
       tempdata = dataout[i];

@@ -5,7 +5,7 @@ files2read = cell(10,1);
 
 for c = 3:1:13
     files2read{(c-2)} = strcat("SensorB2_x5_y", num2str(c));
-    files2read{(c-2)} = strcat(files2read{c-2},"_Take1B.txt");
+    files2read{(c-2)} = strcat(files2read{c-2},"_Take1C.txt");
 end
 
 slopearray = zeros(7,10);
@@ -91,11 +91,11 @@ for k = 1:length(files2read)
         end
 
     end
-%     slope(1,:) = slope(1,:) / 62;
-%     slope(2,:) = slope(2,:) / 82;
-%     slope(3,:) = slope(3,:) / 102;
-%     slope(4,:) = slope(4,:) / 122;
-%     
+    slope(1,:) = slope(1,:) / 62;
+    slope(2,:) = slope(2,:) / 82;
+    slope(3,:) = slope(3,:) / 102;
+    slope(4,:) = slope(4,:) / 122;
+    
 %     slope(1,:) = slope(1,:) / 142;
 %     slope(2,:) = slope(2,:) / 242;
 %     slope(3,:) = slope(3,:) / 342;
@@ -213,10 +213,10 @@ plot(error_slopes,'LineWidth',1)
 %plot(finalslopes(2,:),'LineWidth',1)
 
 
-% ratios = zeros(11,7);
-% for i = 1:11
-%    for j = 1:7
-%        ratios(i,j) = target(i,j)/mean(target(i,:));
-%     end    
-% end
+ratios = zeros(11,7);
+for i = 1:11
+   for j = 1:7
+       ratios(i,j) = target(i,j)/mean(abs(target(i,:));
+    end    
+end
 

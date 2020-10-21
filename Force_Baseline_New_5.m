@@ -1,5 +1,5 @@
 
-fileID = fopen('SensorB2_x5_y11_Take2B.txt','r');
+fileID = fopen('SensorB2_x5_y11_Take1C.txt','r');
 formatSpec = '%f %f %f %f %f %f %f %f %f';
 A = textscan(fileID, formatSpec, 'Delimiter', {'*'});
 Data = cell2mat(A);

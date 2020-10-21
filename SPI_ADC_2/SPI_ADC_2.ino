@@ -173,7 +173,7 @@ void loop()
   }
   buffercounter = buffercounter + 1;
    
-  if(micros() - 1000000 > timer){
+  if(micros() - 50000 > timer){
     timer = micros();
 
     for (int i = 0; i < 8; i++){
