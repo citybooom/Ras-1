@@ -4,11 +4,11 @@
 files2read = cell(10,1);
 
 for c = 3:1:13
-    files2read{(c-2)} = strcat("SensorB2_x5_y", num2str(c));
-    files2read{(c-2)} = strcat(files2read{c-2},"_Take1B.txt");
+    files2read{(c-2)} = strcat("SensorB3_x5_y", num2str(c));
+    files2read{(c-2)} = strcat(files2read{c-2},"_Take3A.txt");
 end
 
-slopearray = zeros(7,10);
+slopearray = zeros(7,11);
 finalslopes = zeros(8,length(files2read));
 
 for k = 1:length(files2read)
@@ -91,65 +91,12 @@ for k = 1:length(files2read)
         end
 
     end
-%     slope(1,:) = slope(1,:) / 62;
-%     slope(2,:) = slope(2,:) / 82;
-%     slope(3,:) = slope(3,:) / 102;
-%     slope(4,:) = slope(4,:) / 122;
-%     
-%     slope(1,:) = slope(1,:) / 142;
-%     slope(2,:) = slope(2,:) / 242;
-%     slope(3,:) = slope(3,:) / 342;
-%     slope(4,:) = slope(4,:) / 442;
-    
-    slopechange =  (slope(1,:)+slope(2,:)+slope(3,:)+slope(4,:))/4; 
-%     slopechange = slope(3,:);
-    slopearray(:,k) = slopechange;
-    
 
-%     for i = 1:pulses
-%         for j = 1:8
-%         displacements(i,j) = slope(1,j)*(167+333*(i-1));
-%         end
-%     end
-% 
-%     fitvals = zeros(1,8);
-% 
-%     for i = 1:pulses
-%         %line([167+333*(i-1) 167+333*(i-1)],[mini maxi],'LineWidth',1) 
-%         for j = 1:8
-%             fitvals(j) = fits{j}(167+333*(i-1));
-%         end
-%         value = mean(justTheData(167+333*(i-1)-5:167+333*(i-1)+5,:)) - fitvals;
-%     %    value = mean(justTheData(167+333*(i-1)-5:167+333*(i-1)+5,:)) - (startvalues + displacements(i,:));
-%         values(i,:) = value;
-%     end
-% 
-% 
-% 
-%     % 
-%     % f1 = fit(xspace,yfit,'poly2');
-%     % 
-%     % plot((1:1:lineCount), f1(1:1:lineCount));
-% % 
-% %     grid minor;
-% %     lgd = legend("1", "2","3", "4", "5", "6", "7", "8");
-% %     title(lgd, "Channel No.")
-% %     ylabel('Voltage Reading (mV)')
-% %     title('Force Baseline Test: Sensor15 Pos3 Take2')
-% 
-% 
-%     %figure 
-% 
-% 
-%     for i = 0:2:pulses
-%         values(pulses-i,:) = [];
-%     end
-% 
-%     
-% 
-%     for i = 1:8
-%         finalslopes(i,k) = values(3,i) - values(1,i);
-%     end
+    
+%    slopechange =  (slope(4,:)+slope(3,:)+slope(2,:)+slope(1,:))/4; 
+    slopechange = slope(3,:);
+    slopearray(:,k) = slopechange;
+  
 
 end
 % 
@@ -157,24 +104,24 @@ end
 
 
 slopecorrect = slopearray';
-measure_ratios = slopecorrect;
-%error_slopes = slopecorrect - target;
-%hold on
+measure_ratios = zeros(11,7);
 
+%hold on
 matcharray = zeros(11,11);
+
 
 for i = 1:11
    for j = 1:7
-       measure_ratios(i,j) = slopecorrect(i,j)/mean(slopecorrect(i,:));
+       measure_ratios(i,j) = slopecorrect(i,j)/mean(abs((slopecorrect(i,:))));
    end    
 end
 
 
-
+%error_slopes = measure_ratios - ratios_2_mod_add;
 for k = 1:11
     for i = 1:11
         for j = 1:7
-            matcharray(i,k) = ratios(i,j) - measure_ratios(k,j);
+            matcharray(i,k) = matcharray(i,k) + abs(ratios_2_mod_add(i,j) - measure_ratios(k,j));
         end
     end
 end
@@ -198,25 +145,30 @@ for i = 1:11
     errors(i) = abs(estimate(i) - i);
 end
 
+disp(mean(mean(slopecorrect ./ measure_ratios)));
 
 
 hold on
-plot(ratios)
+plot(ratios_2_mod_add,'k')
 plot(measure_ratios)
+
+% ratios_2 = error_slopesratios_2 + measure_ratios;
 hold off
 
 figure;
 
+for i = 1:11
+    error_slopes(i,8) = sum(error_slopes(i,:));
+end
+
 plot(error_slopes,'LineWidth',1)
 
-% lgd = legend("1", "2","3", "4", "5", "6", "7", "8");
-%plot(finalslopes(2,:),'LineWidth',1)
 
 
-% ratios = zeros(11,7);
+% ratios = zsueros(11,7);
 % for i = 1:11
 %    for j = 1:7
-%        ratios(i,j) = target(i,j)/mean(target(i,:));
+%        ratios(i,j) = target(i,j)/mean(abs((target(i,:))));
 %     end    
 % end
 

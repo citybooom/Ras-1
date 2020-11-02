@@ -6,9 +6,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QShortcut
 from PyQt5.QtGui import QPainter, QPen, QColor, QKeySequence, QMouseEvent
 from PyQt5.QtCore import Qt, QTimer, QThread
 from scipy import zeros, signal, random, fft, arange
-
 import matplotlib.pyplot as plt
-
 from numpy import sin, linspace, pi
 from pylab import plot, show, title, xlabel, ylabel, subplot
 from sklearn.linear_model import LinearRegression
@@ -16,8 +14,9 @@ from sklearn.linear_model import LinearRegression
 timenow = 0
 lasttime = 0
 hz = 0
-ser = serial.Serial('COM16',timeout=5)
+ser = serial.Serial('COM10',timeout=5)
 ser.baudrate = 115200	
+#ser.timeout = 0            # non blocking read
 data = [0,0,0,0,0,0,0,0]
 datamem = np.array([[0 for x in range(8)] for y in range(200)] )
 dataout = np.array([[0 for x in range(8)] for y in range(200)] )
@@ -31,7 +30,6 @@ ax2.axis([-0.35,0.35,-0.25,0.25])
 plt.show(block=False)
 
 points = [[1/8,1/4],[3/8,1/4],[5/8,1/4],[7/8,1/4],[7/8,3/4],[5/8,3/4],[3/8,3/4],[1/8,3/4]]
-
 
 
 lines = [None]*8
@@ -55,8 +53,6 @@ while(1):
 	lasttime = timenow
 	# print(str(hz) + " Hz")
 
-
-
 	while(ser.read() != b':'):
 		pass
 
@@ -74,9 +70,6 @@ while(1):
 		
 		charcounter = charcounter + 1
 		i = i + 10
-
-
-
 
 	dataarray = np.array(data.copy()).reshape((1,8))
 	datamem = np.append(datamem, dataarray, axis=0)

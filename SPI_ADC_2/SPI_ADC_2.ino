@@ -34,7 +34,7 @@ long tempdata3 = 0;
 double j;
 long timer = 0;
 int buffercounter = 0;
-int chargingtimer = 10;
+int chargingtimer = 10000;
 
 
 byte res = 0;
@@ -124,35 +124,35 @@ void loop()
 {
   digitalWrite(SSadc, HIGH);
 
-  if(first) {
+  if (first) {
     digitalWrite(SSadc, LOW);
     writeDummyWord(10);
     digitalWrite(SSadc, HIGH);
-  
+
     digitalWrite(SSadc, LOW);
     writeDummyWord(10);
     digitalWrite(SSadc, HIGH);
   }
-  
+
   gatherData();
-  
+
   if (chargingtimer > 0) {
     for (int i = 0; i < 8; i++) {
       firstreadings[i] = readings[i];
     }
     chargingtimer = chargingtimer - 1;
   }
-//    else{
-//      for(int i = 0; i < 8; i++){
-//        firstreadings[i] = firstreadings[i] + (readings[i]-firstreadings[i])*0.002;
-//      }
-//    }
+  //    else{
+  //      for(int i = 0; i < 8; i++){
+  //        firstreadings[i] = firstreadings[i] + (readings[i]-firstreadings[i])*0.002;
+  //      }
+  //    }
 
   dataave = 0;
-  for (int i = 0; i < 8; i++){
-    dataave = dataave + (readings[i] - firstreadings[i]) /8;
+  for (int i = 0; i < 8; i++) {
+    dataave = dataave + (readings[i] - firstreadings[i]) / 8;
   }
-  if( first) {
+  if ( first) {
     EMA_S = dataave;
   }
 
@@ -160,42 +160,44 @@ void loop()
   EMA_S = (EMA_a * (dataave)) + ((1 - EMA_a) * EMA_S);
   highpass = (dataave) - EMA_S;
   //highpass = 0;
-  
+
   for (int i = 0; i < 8; i++) {
     dataprefilt[i] = readings[i] - firstreadings[i];
     datafilt[i] =  dataprefilt[i] - highpass;
-    if(buffercounter == 0) {
+    if (buffercounter == 0) {
       dataout[i] = datafilt[i];
     }
-    else{
+    else {
       dataout[i] = dataout[i] + datafilt[i];
     }
   }
   buffercounter = buffercounter + 1;
-   
-  if(micros() - 50000 > timer){
+
+  if (micros() - 50000 > timer) {
     timer = micros();
 
-    for (int i = 0; i < 8; i++){
+    for (int i = 0; i < 8; i++) {
       dataout[i] = dataout[i] / buffercounter;
     }
 
-   
+
     Serial.print(": ");
-  
+
     for (int i = 0; i < 8; i++) {
-      tempdata = dataout[i];
-      if (tempdata > 0) {
-        Serial.print(" ");
+      if (i != 4) {
+        tempdata = dataout[i];
+        if (tempdata > 0) {
+          Serial.print(" ");
+        }
+        j = log10(abs(tempdata));
+        if (tempdata == 0)
+          j = 1;
+        while (j < 8) {
+          Serial.print(" ");
+          j = j + 1;
+        }
+        Serial.print(tempdata);
       }
-      j = log10(abs(tempdata));
-      if (tempdata == 0)
-        j = 1;
-      while (j < 8) {
-        Serial.print(" ");
-        j = j + 1;
-      }
-      Serial.print(tempdata);
     }
     Serial.println("  ");
     //Serial.println(buffercounter);

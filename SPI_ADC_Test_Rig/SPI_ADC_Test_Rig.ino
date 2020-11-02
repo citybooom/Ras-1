@@ -34,7 +34,7 @@ long tempdata3 = 0;
 double j;
 unsigned long timer = 0;
 int buffercounter = 0;
-int chargingtimer = 2;
+long chargingtimer = 0;
 
 
 byte res = 0;
@@ -56,9 +56,7 @@ void setup()
   OCR1A =  0;       // output every cycle
 
 
-  //Set Pin Direction
-  //Again, the other SPI pins are configured automatically
-  delay(1000);
+  delay(10);
   pinMode(SSpot, OUTPUT);
   pinMode(RESET, OUTPUT);
   pinMode(SSadc, OUTPUT);
@@ -88,27 +86,18 @@ void setup()
   SPI.transfer(0b00010001);
   SPI.transfer(0b00000000);
 
-  //Serial.println("Begin Reset Attempt");
   byte packet = 0;
-  //  while(packet != 0b11111111){
-  //    bytecount = bytecount + 1;
-  //    packet = SPI.transfer(0);
-  //    }
+
   if (SPI.transfer(0) == 0b00101000) {
     Serial.print("Reset successful in ");
     Serial.print(bytecount, BIN);
     Serial.println(" cycles");
   }
   else {
-    //Serial.println("Reset Failed");
   }
   digitalWrite(SSadc, HIGH);
-  //writeRegister(0x2C, 0b1111111100000010);
-
-
 
   delay(10);
-  setPot(1, 0);
 
   digitalWrite(SSadc, LOW);
   writeDummyWord(10);
@@ -117,7 +106,7 @@ void setup()
   digitalWrite(SSadc, LOW);
   writeDummyWord(10);
   digitalWrite(SSadc, HIGH);
-  timer = millis();
+  timer = micros();
 }
 
 void loop()
@@ -142,28 +131,12 @@ void loop()
     }
     chargingtimer = chargingtimer - 1;
   }
-//    else{
-//      for(int i = 0; i < 8; i++){
-//        firstreadings[i] = firstreadings[i] + (readings[i]-firstreadings[i])*0.002;
-//      }
-//    }
-
-  dataave = 0;
-  for (int i = 0; i < 8; i++){
-    dataave = dataave + (readings[i] - firstreadings[i]) /8;
-  }
-  if( first) {
-    EMA_S = dataave;
-  }
 
   first = 0;
-  EMA_S = (EMA_a * (dataave)) + ((1 - EMA_a) * EMA_S);
-  highpass = (dataave) - EMA_S;
-  highpass = 0;
-  
+ 
   for (int i = 0; i < 8; i++) {
     dataprefilt[i] = readings[i] - firstreadings[i];
-    datafilt[i] =  dataprefilt[i] - highpass;
+    datafilt[i] =  dataprefilt[i];
     if(buffercounter == 0) {
       dataout[i] = datafilt[i];
     }
@@ -172,38 +145,44 @@ void loop()
     }
   }
   buffercounter = buffercounter + 1;
-  while(millis() > 30000){} 
-  if(millis() - 20 > timer){
-    timer = millis();
+
+  
+//  while(millis() > 30000){} 
+  if(micros() - 50000 > timer){
+    timer = micros();
+    
 
     for (int i = 0; i < 8; i++){
       dataout[i] = readings[i];
+      //dataout[i] = readings[i];
     }
-    //delay(1000);
+//    delay(1000);
 //    Serial.print(millis()/1000.0);
 //    Serial.print("  ");
-  
+    Serial.print(": ");
     for (int i = 0; i < 8; i++) {
-      tempdata = dataout[i];
-      if (tempdata > 0) {
-        Serial.print(" ");
+      if(i!= 9){
+        tempdata = dataout[i];
+        if (tempdata > 0) {
+          Serial.print(" ");
+        }
+        j = log10(abs(tempdata));
+        if (tempdata == 0)
+          j = 1;
+        while (j < 8) {
+          Serial.print(" ");
+          j = j + 1;
+        }
+        if(1){
+          Serial.print(tempdata);
+        }
       }
-      j = log10(abs(tempdata));
-      if (tempdata == 0)
-        j = 1;
-      while (j < 8) {
-        Serial.print(" ");
-        j = j + 1;
-      }
-      Serial.print(tempdata);
     }
     Serial.println("  ");
-    //Serial.println(buffercounter);
     buffercounter = 0;
   }
   dataindex = 0;
 }
-
 
 
 void writeDummyWord(int numBytes) {
@@ -255,64 +234,4 @@ int transferSPI(byte datain) {
   }
   return result;
 
-}
-
-void writeRegister(byte thisRegister, int thisValue) {
-
-  transmission1 = 0b011 << 5 | (thisRegister >> 1); // Write command in first 3 bit
-  transmission2 = (thisRegister | 0b1) << 7;
-
-  data1 = thisValue & 0b0000000011111111;
-  data2 = (thisValue & 0b1111111100000000) >> 8;
-
-  digitalWrite(SSadc, LOW);
-  transferSPI(transmission1); //Send register location
-  transferSPI(transmission2); //Send register location
-  transferSPI(0);
-
-  transferSPI(data2); //Send register location
-  transferSPI(data1); //Send register location
-  transferSPI(0);
-
-  expectedResp =  0b010 << 5 | (thisRegister >> 1);
-
-  while (data[dataindex - 1] != expectedResp) {
-    transferSPI(0b00000000);
-  }
-  digitalWrite(SSadc, HIGH);
-  unsigned int result  = readRegister(thisRegister, 0);
-  Serial.println(result, BIN);
-
-}
-
-unsigned int readRegister(byte thisRegister, byte thisLen) {
-
-  transmission1 = 0b101 << 5 | (thisRegister >> 1); // Write command in first 3 bit
-  transmission2 = (thisRegister | 0b1) << 7;
-
-  digitalWrite(SSadc, LOW);
-  transferSPI(transmission1); //Send register location
-  transferSPI(transmission2); //Send register location
-  transferSPI(0);
-  writeDummyWord(9);
-  digitalWrite(SSadc, HIGH);
-  while (digitalRead(DATA_READY) == 0);
-  digitalWrite(SSadc, LOW);
-  unsigned int firstbit = transferSPI(0b00000000);
-  int secondbit = transferSPI(0b00000000);
-  digitalWrite(SSadc, HIGH);
-
-  unsigned int result = ((firstbit * 256) | secondbit);
-  return result;
-
-
-
-}
-
-void setPot(int reg, int level)
-{
-  digitalWrite(SSpot, LOW);
-  SPI.transfer(reg);
-  SPI.transfer(level);
-  digitalWrite(SSpot, HIGH);
 }

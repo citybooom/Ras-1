@@ -1,5 +1,5 @@
 
-fileID = fopen('SensorB2_x5_y11_Take1C.txt','r');
+fileID = fopen('SensorB3_x6_y5_Take1.txt','r');
 formatSpec = '%f %f %f %f %f %f %f %f %f';
 A = textscan(fileID, formatSpec, 'Delimiter', {'*'});
 Data = cell2mat(A);
@@ -50,7 +50,7 @@ xspace = [(100:1:300) (766:1:966) (1432:1:1632) (2100:1:2150)]';
 yfit = zeros(654,8);
 fits = cell(1,8);
 
-justTheFiltered(:,7) = [];
+justTheFiltered(:,5) = [];
 
 datasum = zeros(length(justTheFiltered),1);
 
@@ -70,7 +70,7 @@ plot(justTheFiltered)
 subplot(2,1,2);
 plot(common_noise)
 
-for i = 1:5
+for i = 1:3
     for j = 1:7
         center = -30 + (400*(i));
         startpoint = center - 100;
