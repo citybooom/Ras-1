@@ -67,10 +67,6 @@ void setup() {
 void loop(){
   while(digitalRead(switchPin) == 0){}
 
-  High_stepper.moveTo(0);
-  High_stepper.runToPosition();
-  Low_stepper.moveTo(0);
-  Low_stepper.runToPosition();
 
   lcd.clear();
   lcd.print("X       Y");  
@@ -99,7 +95,7 @@ void loop(){
     }
 
     if (StepperPos_Y%2 == 0){
-      for(StepperPos_X = StepperMoveSteps_X; StepperPos_X>=0; StepperPos_X--){
+      for(StepperPos_X = StepperMoveSteps_X; StepperPos_X>=1; StepperPos_X--){
         High_stepper.moveTo(400*StepperPos_X);
         High_stepper.runToPosition();
         Serial.print(':');
@@ -121,6 +117,11 @@ void loop(){
     Low_stepper.moveTo(320*StepperPos_Y);
     Low_stepper.runToPosition();
   }
+  
+  High_stepper.moveTo(0);
+  High_stepper.runToPosition();
+  Low_stepper.moveTo(0);
+  Low_stepper.runToPosition();
 }
 
 void LCD_print(int x, int y){

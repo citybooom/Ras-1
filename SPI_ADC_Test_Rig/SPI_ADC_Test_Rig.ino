@@ -64,7 +64,7 @@ void setup()
   pinMode(DATA_READY, INPUT);
   digitalWrite(RESET, HIGH);
   digitalWrite(SSpot, HIGH);
-  Serial.begin(115200);
+  Serial.begin(9600);
 
 
   //Initialize SPI
@@ -148,7 +148,7 @@ void loop()
 
   
 //  while(millis() > 30000){} 
-  if(micros() - 50000 > timer){
+  if(micros() - 500 > timer){
     timer = micros();
     
 
