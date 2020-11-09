@@ -1,11 +1,10 @@
 
-%formatSpec = '%f %f %f %f %f %f %f %f %f';
-A = fileread("Test13.txt");
-%Data = cell2mat(A);
 
+A = fileread("Test13.txt");
 count = 1;
 lasti = 1;
 lineArray = ["Start"];
+
 for i = (1:length(A))
     if(A(i) == 13)
         charArray  = A(lasti:i-1);
@@ -54,7 +53,6 @@ for i = 1:10
         Baselines = mean(BaselineData);
         Peak = max(DataSets{i,j} );
         Trough = min(DataSets{i,j});
-        %if(abs(Peak - Baselines) > abs(Trough - Baselines))
         for k = 1:8
             if(abs(Peak(k) - Baselines(k)) > abs(Trough(k) - Baselines(k)))
                 Readings(i,j,k) = Peak(k) - Baselines(k);
@@ -62,31 +60,57 @@ for i = 1:10
                 Readings(i,j,k) = Trough(k) - Baselines(k);
             end
         end
-        
-        RatioSets = cell(10,24);
-        
-        for i = 1:length(DataSets(1,:))
-            for j = 1:length(DataSets(1,:))
-                data = [
-                for k = 1:length(DataSets{1,1}(:,1))
-                    average = 0;
-                    for m = 1:length(DataSets{1,1}(1,:))
-                        average = average + DataSets{i,j}(k,m);
-                    end
-                    average = average / length(DataSets{1,1}(1,:));
-                    for m = 1:length(DataSets{1,1}(1,:))
-                        average = 
-                    end
-                end
-            end
-        end
-        
-        %else
-           % Readings(i,j,:) = Trough - Baselines;
-        %end
     end
 end
 
+Ratios = zeros(10,24,8);
+
+for i = 1:length(DataSets(:,1))
+    for j = 1:length(DataSets(1,:))
+        average = 0;
+        for k = 1:8
+           average = average + Readings(i,j,k)/8;
+        end
+        for k = 1:8
+           Ratios(i,j,k) = Readings(i,j,k)/average;
+        end    
+    end
+end
+
+matcharray = zeros(240,240);
 
 
+for i = 1:10
+    for j = 1:24
+       for x = 1:10
+            for y = 1:24
+            match = 0;
+                for z = 1:8
+                    match = match + abs(Ratios(i,j,z) - golden_ratio(x,y,z));
+                end
+                matcharray((i-1)*24+j, (x-1)*24+y) = match;
+            end
+        end
+    end
+end
+
+estimate = zeros(240,1);
+errors  = zeros(240,1);
+for i = 1:240
+    mini = matcharray(1,i);
+    mindex = 1;
+    for j = 2:240
+        if abs(matcharray(j,i)) < abs(mini)
+            mini = matcharray(j,i);
+            mindex = j;
+        end
+    end
+    estimate(i) = mindex;
+    errors(i) = mod(abs(estimate(i) - i),24) + rem(abs(estimate(i) - i),24);
+end
+
+correctcount = 0;
+for i = 1:240
+    if errors(i) = 
+end
 

@@ -1,13 +1,13 @@
 import serial
 
 
-ser = serial.Serial('COM10',timeout=5)
+ser = serial.Serial('COM17',timeout=5)
 ser.baudrate = 115200
 
 ser2 = serial.Serial('COM11', timeout=0)
 ser2.baudrate = 115200
 
-f = open("Test13.txt", "a")
+f = open("Test14_C2.txt", "a")
 
 trial_pos = '0_0'
 count = 0

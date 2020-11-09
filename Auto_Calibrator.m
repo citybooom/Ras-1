@@ -1,6 +1,6 @@
 
 
-A = fileread("Test13.txt");
+A = fileread("Test14_C2.txt");
 count = 1;
 lasti = 1;
 lineArray = ["Start"];
@@ -77,6 +77,49 @@ for i = 1:length(DataSets(:,1))
     end
 end
 
+matcharray = zeros(240,240);
 
 
+for i = 1:10
+    for j = 1:24
+       for x = 1:10
+            for y = 1:24
+            match = 0;
+                for z = 1:8
+                    match = match + abs(Ratios(i,j,z) - golden_ratio(x,y,z));
+                end
+                matcharray((i-1)*24+j, (x-1)*24+y) = match;
+            end
+        end
+    end
+end
 
+estimate = zeros(240,1);
+errors  = zeros(240,1);
+for i = 1:240
+    mini = matcharray(1,i);
+    mindex = 1;
+    for j = 2:240
+        if abs(matcharray(j,i)) < abs(mini)
+            mini = matcharray(j,i);
+            mindex = j;
+        end
+    end
+    estimate(i) = mindex;
+    errors(i) = mod(abs(estimate(i) - i),24) + rem(abs(estimate(i) - i),24);
+end
+
+correctcount = 0;
+closecount = 0;
+for i = 5:240
+    if errors(i) == 0
+        correctcount = correctcount + 1;
+    end
+    if errors(i) <= 2
+        closecount = closecount + 1;
+    end
+end
+
+
+correctcount/235
+closecount/235
