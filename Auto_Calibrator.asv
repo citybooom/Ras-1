@@ -1,10 +1,11 @@
 
-
+%formatSpec = '%f %f %f %f %f %f %f %f %f';
 A = fileread("Test13.txt");
+%Data = cell2mat(A);
+
 count = 1;
 lasti = 1;
 lineArray = ["Start"];
-
 for i = (1:length(A))
     if(A(i) == 13)
         charArray  = A(lasti:i-1);
@@ -53,6 +54,7 @@ for i = 1:10
         Baselines = mean(BaselineData);
         Peak = max(DataSets{i,j} );
         Trough = min(DataSets{i,j});
+        %if(abs(Peak - Baselines) > abs(Trough - Baselines))
         for k = 1:8
             if(abs(Peak(k) - Baselines(k)) > abs(Trough(k) - Baselines(k)))
                 Readings(i,j,k) = Peak(k) - Baselines(k);
@@ -60,20 +62,28 @@ for i = 1:10
                 Readings(i,j,k) = Trough(k) - Baselines(k);
             end
         end
-    end
-end
-
-Ratios = zeros(10,24,8);
-
-for i = 1:length(DataSets(:,1))
-    for j = 1:length(DataSets(1,:))
-        average = 0;
-        for k = 1:8
-           average = average + Readings(i,j,k)/8;
+        
+        RatioSets = cell(10,24);
+        
+        for i = 1:length(DataSets(1,:))
+            for j = 1:length(DataSets(1,:))
+                data = [
+                for k = 1:length(DataSets{1,1}(:,1))
+                    average = 0;
+                    for m = 1:length(DataSets{1,1}(1,:))
+                        average = average + DataSets{i,j}(k,m);
+                    end
+                    average = average / length(DataSets{1,1}(1,:));
+                    for m = 1:length(DataSets{1,1}(1,:))
+                        average = 
+                    end
+                end
+            end
         end
-        for k = 1:8
-           Ratios(i,j,k) = Readings(i,j,k)/average;
-        end    
+        
+        %else
+           % Readings(i,j,:) = Trough - Baselines;
+        %end
     end
 end
 
