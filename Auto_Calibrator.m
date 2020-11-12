@@ -1,6 +1,6 @@
 
 
-A = fileread("Test19_C1_Beeg.txt");
+A = fileread("Test19_C1_beeg.txt");
 count = 1;
 lasti = 1;
 lineArray = ["Start"];
@@ -87,7 +87,7 @@ for i = 1:10
             for y = 1:24
             match = 0;
                 for z = 1:8
-                    match = match + abs(Ratios(i,j,z) - smallRatios(x,y,z));
+                    match = match + abs(Ratios(i,j,z) - golden_ratio(x,y,z));
                 end
                 matcharray((i-1)*24+j, (x-1)*24+y) = match;
             end
@@ -107,8 +107,8 @@ for i = 1:240
         end
     end
     estimate(i) = mindex;
-    errors(i) = round(abs(estimate(i) - i)/24);
-    errors(i) = errors(i) + abs(estimate(i) - i )- errors(i)*24;
+    errors(i) = round((estimate(i) - i)/24);
+    errors(i) = errors(i) + (estimate(i) - i )- errors(i)*24;
 end
 
 correctcount = 0;
@@ -127,7 +127,7 @@ for i = 1:10
     for j = 1:24
         match = 0;
         for k = 1:8
-             match = match + min(0,oldreadings(i,j,k)- Readings(i,j,k));
+             match = match + min(0,golden_ratio(i,j,k)- Ratios(i,j,k));
              %match = match + abs(oldratios(i,j,k)- Ratios(i,j,k));
         end
         if(abs(match) < 300000)
@@ -140,11 +140,13 @@ ErrorVisual = zeros(10,24);
 
 for i = 1:10
     for j = 1:24
-        
-        
+        ErrorVisual(i,j) = errors((i-1)*24 + j);
     end
 end
+%hold on
+surf(ErrorVisual);
+% daspect([1 1 10]);
 
-surf(Visual);
+%hold off
 % correctcount/235;
 % closecount/235;
