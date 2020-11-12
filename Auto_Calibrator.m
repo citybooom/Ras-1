@@ -1,6 +1,6 @@
 
 
-A = fileread("Test14_C2.txt");
+A = fileread("Test19_C1_Beeg.txt");
 count = 1;
 lasti = 1;
 lineArray = ["Start"];
@@ -46,6 +46,7 @@ DataSets{pos(1),pos(2)} = dataCache;
 
 Readings = zeros(10,24,8);
 
+
 for i = 1:10
     for j = 1:24
         tempdata = DataSets{i,j};
@@ -69,7 +70,7 @@ for i = 1:length(DataSets(:,1))
     for j = 1:length(DataSets(1,:))
         average = 0;
         for k = 1:8
-           average = average + Readings(i,j,k)/8;
+           average = average + (Readings(i,j,k)/8);
         end
         for k = 1:8
            Ratios(i,j,k) = Readings(i,j,k)/average;
@@ -86,7 +87,7 @@ for i = 1:10
             for y = 1:24
             match = 0;
                 for z = 1:8
-                    match = match + abs(Ratios(i,j,z) - golden_ratio(x,y,z));
+                    match = match + abs(Ratios(i,j,z) - smallRatios(x,y,z));
                 end
                 matcharray((i-1)*24+j, (x-1)*24+y) = match;
             end
@@ -106,7 +107,8 @@ for i = 1:240
         end
     end
     estimate(i) = mindex;
-    errors(i) = mod(abs(estimate(i) - i),24) + rem(abs(estimate(i) - i),24);
+    errors(i) = round(abs(estimate(i) - i)/24);
+    errors(i) = errors(i) + abs(estimate(i) - i )- errors(i)*24;
 end
 
 correctcount = 0;
@@ -120,6 +122,29 @@ for i = 5:240
     end
 end
 
+Visual = zeros(10,24);
+for i = 1:10
+    for j = 1:24
+        match = 0;
+        for k = 1:8
+             match = match + min(0,oldreadings(i,j,k)- Readings(i,j,k));
+             %match = match + abs(oldratios(i,j,k)- Ratios(i,j,k));
+        end
+        if(abs(match) < 300000)
+            Visual(i,j) = match;
+        end
+    end
+end
 
-correctcount/235
-closecount/235
+ErrorVisual = zeros(10,24);
+
+for i = 1:10
+    for j = 1:24
+        
+        
+    end
+end
+
+surf(Visual);
+% correctcount/235;
+% closecount/235;

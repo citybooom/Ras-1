@@ -147,7 +147,7 @@ void DCMotorMove(){
     pastState = currentState;
     delay(10);
   }
-  delay(800-MotorSpeed);
+  delay(600-MotorSpeed);
   Motor1.setSpeed(0);
   
 }
