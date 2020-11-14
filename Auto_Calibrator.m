@@ -89,7 +89,7 @@ for i = 1:10
                 for z = 1:8
                     match = match + abs(Ratios(i,j,z) - golden_ratio(x,y,z));
                 end
-                matcharray((i-1)*24+j, (x-1)*24+y) = match;
+            matcharray((i-1)*24+j, (x-1)*24+y) = match;
             end
         end
     end

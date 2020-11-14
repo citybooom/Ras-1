@@ -173,7 +173,7 @@ void loop()
   }
   buffercounter = buffercounter + 1;
 
-  if (micros() - 50000 > timer) {
+  if (micros() - 150000 > timer) {
     timer = micros();
 
     for (int i = 0; i < 8; i++) {
@@ -184,7 +184,7 @@ void loop()
     Serial.print(": ");
 
     for (int i = 0; i < 8; i++) {
-      if (i != 4) {
+      if (i != 9) {
         tempdata = dataout[i];
         if (tempdata > 0) {
           Serial.print(" ");

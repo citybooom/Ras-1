@@ -1,7 +1,8 @@
+import xlrd
+import numpy as np
 import sys, math, random, queue, threading, time
 import pyautogui
 import serial
-import numpy	
 from PyQt5.QtWidgets import QApplication, QWidget, QShortcut
 from PyQt5.QtGui import QPainter, QPen, QColor, QKeySequence, QMouseEvent
 from PyQt5.QtCore import Qt, QTimer, QThread
@@ -12,55 +13,6 @@ from pylab import plot, show, title, xlabel, ylabel, subplot
 from sklearn.linear_model import LinearRegression
 
 
-
-WIDTH = 75
-grid = []
-intense = 80
-
-xpos = 50
-ypos = 50
-
-def Extract(lst, ele): 
-    return [item[ele] for item in lst]
-
-class Cell():
-	def __init__(self, i, j, intensity):
-		self.i = i
-		self.j = j
-		self.walls = [1, 1, 1, 1]  # top, right, bottom, left
-		self.intensity = intensity
-		#print(intensity)
-	def index(self, i, j, cols, rows):
-		if (i < 0) or (j < 0) or (i > (cols - 1)) or (j > (rows - 1)):
-			return None
-		else:
-			return i + j * cols
-	def __str__(self):
-		return("Cell at x:" + str(self.i) + " y:" + str(self.j) + " intensity: " + str(self.intensity))
-
-class PressurePoint():
-	def __init__(self, i, j, intensity):
-		self.i = i
-		self.j = j
-		self.intensity = intensity
-
-def plotSpectrum(y,Fs):
- """
- Plots a Single-Sided Amplitude Spectrum of y(t)
- """
- n = len(y) # length of the signal
- k = arange(n)
- T = n/Fs
- frq = k/T # two sides frequency range
- frq = frq[range(int(n/2))] # one side frequency range
-
- Y = fft(y)/n # fft computing and normalization
- Y = Y[range(int(n/2))]
- 
- plot(frq,abs(Y)) # plotting the spectrum
- xlabel('Freq (Hz)')
- ylabel('|Y(freq)|')
-
 class App(QWidget):
 	def __init__(self):
 		super().__init__()
@@ -70,13 +22,13 @@ class App(QWidget):
 		self.data1mem = []
 		self.state = 0
 		self.diffbuffer = numpy.array([[0 for x in range(8)] for y in range(1)])
-		self.totalforcebuffer = []
+
 		self.data = [0,0,0,0,0,0,0,0]
 		self.databaseline = [0,0,0,0,0,0,0,0]
 		self.dataout = [1,1,1,1,1,1,1,1] 
 		self.datafiltered = [1,1,1,1,1,1,1,1] 
 		self.first = 1000
-		self.ser = serial.Serial('COM10',timeout=5)
+		self.ser = serial.Serial('COM12',timeout=5)
 		self.ser.baudrate = 115200
 		self.pressed = 0
 		self.left = 0
@@ -85,16 +37,11 @@ class App(QWidget):
 		self.width = 1400
 		self.height = 620
 		self.color = 0
-		self.point = (10,10)
 		self.force = 80
 		self.up = 0
-		self.cols = math.floor(self.width / WIDTH)
-		self.rows = math.floor(self.height / WIDTH)
-		self.points = [[self.cols*1/8,self.rows/4],[self.cols*3/8,self.rows/4],[self.cols*5/8,self.rows/4],[self.cols*7/8,self.rows/4],\
-		[self.cols*7/8,self.rows*3/4],[self.cols*5/8,self.rows*3/4],[self.cols*3/8,self.rows*3/4],[self.cols*1/8,self.rows*3/4]]
+
 		self.active = False
 		self.initui()
-		self.init_cells(self.point, intense)
 
 		# Filter Coeficients
 
@@ -110,12 +57,6 @@ class App(QWidget):
 		self.d, self.c = signal.butter(20, 3, fs=35)
 		self.y = signal.lfilter_zi(self.d, self.c)
 
-		# Midpoints
-
-		self.midpoints = [None]*16
-
-
-		#plotting
 
 	def keyPressEvent(self, event):
 		global intense
@@ -124,61 +65,12 @@ class App(QWidget):
 		if(event.text() == 'd'):
 			intense = intense - 1
 
-	def mousePressEvent (self, event):
-		self.pressed = 0
-	
-	def mouseReleaseEvent(self, event):
-		self.pressed = 0
-
-	def findClosestPoint(self, i, j):
-		
-		closestDist = 100000
-		
-		if not self.points:
-			return None
-		closestPoint = self.points[0].copy()
-		number = 0
-		closestnumber = 0
-		firstpoint = 1
-		for p in self.points:
-			if firstpoint == 1:
-				closestPoint = p
-				closestDist = math.sqrt((p[0] - i)**2 + (p[1] - j)**2)
-				firstpoint = 0
-			else:
-				if (math.sqrt((p[0] - i)**2 + (p[1] - j)**2) < closestDist):
-					closestPoint = p
-					closestDist = math.sqrt((p[0] - i)**2 + (p[1] - j)**2)
-					closestnumber = number
-			number = number + 1
-		# print(closestPoint.copy())
-		return closestPoint.copy(), closestnumber
-
-
-
-		return
-
 	def init_cells(self, point, force):
-		if not self.active:
-			del grid[:]
-			for j in range(self.rows):
-				for i in range(self.cols):
-					closestPoint, number = self.findClosestPoint(i,j)
-					if closestPoint is None:
-						cell = Cell(i, j, 0)
-					else:
-						cell = Cell(i, j, min(255 , 255- (int(math.sqrt(abs(closestPoint[0]-i)**2 + abs(closestPoint[1]-j)**2)*(20)))))
-					grid.append(cell)
-			QTimer.singleShot(1, self.go)
-
+		
 	def go(self):
 
-		global xpos
-		global ypos
-
 		self.active = True
-		diff = 0
-		diffcounter = 0
+		
 		while True:
 			self.update()
 
@@ -268,17 +160,10 @@ class App(QWidget):
 					intensities[count] = abs(point.intensity)
 					count = count + 1
 					
-				#print(xpositions)
-
-				# print(xpositions)
-				# print(ypositions)
-				# print(intensities)
-
 				self.WLS.fit(numpy.asarray(xpositions), numpy.asarray(ypositions), sample_weight=intensities)
 
 				self.centerPressure = Cell(int(self.point[0]),int(self.point[1]),sum(numpy.square(self.datafiltered))/1000)
 
-				#print(self.WLS.coef_[0])
 				self.fitted = 1
 				
 
@@ -286,11 +171,7 @@ class App(QWidget):
 				prevdiff = diff
 				diff = 0
 				drift = 0
-				##print(diff)
-				#diffdiff = (diff-prevdiff)
-				#print(diffdiff)
-				# print(self.databaseline)
-				# print(self.data)
+
 				self.diffbuffer = numpy.append(self.diffbuffer, numpy.array(self.datafiltered).reshape((1,8)), axis=0)
 				if(numpy.size(self.diffbuffer) > 64):
 					drift = sum(numpy.subtract(self.diffbuffer[0,:],self.diffbuffer[7,:]))
@@ -301,41 +182,7 @@ class App(QWidget):
 					print(self.diffbuffer[7,:])
 					print(drift)
 					print(diff)
-				# print("diff")
-					
 
-				# print(numpy.array(self.datafiltered))
-				
-				# if(len(self.diffbuffer) > 10):
-				# 	self.diffbuffer.pop()
-				# if(self.state == 0):
-				# 	if(diffdiff < 750):
-				# 		self.databaseline = self.data.copy()
-				# 	else:
-				# 		self.state = 1
-				# if(self.state == 1):
-				# 	if(diffdiff < -diff/20):
-				# 		diffcounter = diffcounter + 1
-				# 		#print("diff")
-				# 	elif diffcounter > 0:
-				# 		diffcounter = diffcounter - 1
-				# 	if diffcounter > 3 or diffdiff < -5000:
-				# 		self.databaseline = self.data.copy()
-				# 		self.state = 0
-				# print(self.state)
-
-				# #print(diff)
-
-				# print(self.databaseline)
-				# print(self.data)	
-				# print(self.dataout)
-				#print(self.datafiltered)	
-				#print(str(self.midpoints[0]))
-				# print(sum(self.dataout))
-				#print(self.dataout)
-				#print(dataout)
-
-			
 			QApplication.processEvents()
 			#QThread.msleep(1)
 			if(self.pressed):
@@ -351,7 +198,7 @@ class App(QWidget):
 		self.active = False
 
 	def initui(self):
-		QShortcut(QKeySequence('F5'), self, self.init_cells)
+		# QShortcut(QKeySequence('F5'), self, self.init_cells)
 		self.setGeometry(self.left, self.top, self.width, self.height)
 		self.setAutoFillBackground(True)
 		p = self.palette()
@@ -361,100 +208,8 @@ class App(QWidget):
 
 	def paintEvent(self, e):
 		
-		# Draw full grid
-
 		for c in grid:
-			closestPoint, number = self.findClosestPoint(c.i,c.j)
-			if closestPoint is not None:
-				c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(closestPoint[0]-c.i)**2 + abs(closestPoint[1]-c.j)**2)*(100-(self.dataout[number])/1000)))))
 			self.draw_single_cell(c)
-		self.draw_single_cell(self.centerPressure)
-		#qp.drawLine(0    , 400    , 4, 400 + (WLS.coef_[0]*10))
-
-		#Draw Pressure
-		for c in grid:
-			c.intensity = 0
-
-
-		for c in grid:
-			if(sum(self.dataout) and self.state):
-				#c.intensity = min(255 , 255- min(255 ,(int(math.sqrt(abs(self.centerPressure.i-c.i)**2 + abs(self.centerPressure.j-c.j)**2)*(60)))))
-				for ele in self.midpoints:
-					pass
-					# c.intensity = min(255 , c.intensity + min(255 , int((1/(1+((abs(ele.i-c.i)**2 + abs(ele.j-c.j)**2)))*2*(ele.intensity)))))
-					#print((int(10/(1+(math.sqrt(abs(ele.i-c.i)**2 + abs(ele.j-c.j)**2)*(ele.intensity))))))
-					#c.intensity = 255
-
-			else:
-				c.intensity = 0
-			self.draw_single_cell(c)
-
-
-
-		outputs = "outputs: "
-		if(self.midpoints[0]):
-			for midpoint in self.midpoints:
-				outputs = (outputs + str(midpoint.intensity) + " ")
-
-		# print(outputs)
-
-		if self.state and self.centerPressure.intensity>-10:
-			self.draw_single_cell(self.centerPressure)
-			self.draw_single_cell(self.midpoints[0])
-			self.draw_single_cell(self.midpoints[1])
-			self.draw_single_cell(self.midpoints[2])
-			self.draw_single_cell(self.midpoints[3])
-			self.draw_single_cell(self.midpoints[4])
-			self.draw_single_cell(self.midpoints[5])
-
-			self.draw_single_cell(self.midpoints[6])
-			self.draw_single_cell(self.midpoints[7])
-			self.draw_single_cell(self.midpoints[8])
-			self.draw_single_cell(self.midpoints[9])
-
-			self.draw_single_cell(self.midpoints[10])
-			self.draw_single_cell(self.midpoints[11])
-			self.draw_single_cell(self.midpoints[12])
-			self.draw_single_cell(self.midpoints[13])
-			self.draw_single_cell(self.midpoints[14])
-			self.draw_single_cell(self.midpoints[15])
-				
-			# outputs = "outputs: "
-			# for midpoint in self.midpoints:
-			# 	outputs = (outputs + str(midpoint.intensity) + " ")
-			# print(outputs)
-			pass
-		#print(self.centerPressure.i)
-		#print(self.centerPressure.j)
-
-		if(self.fitted):
-			self.draw_line()
-
-	def draw_line(self):
-
-		qp = QPainter(self)
-		qp.setPen(QPen(Qt.green, 1, Qt.SolidLine))
-		slope = (self.WLS.coef_[0])
-		#print(slope[0])
-		qp.drawLine(self.centerPressure.i*WIDTH, self.centerPressure.j*WIDTH  , self.centerPressure.i*WIDTH + 200, self.centerPressure.j*WIDTH + int(200*slope[0]))
-
-	def draw_cell_manual(self, cell):
-		x = cell.i * WIDTH
-		y = cell.j * WIDTH
-		# LINES
-		qp = QPainter(self)
-		qp.setPen(QPen(Qt.black, 1, Qt.SolidLine))
-		if cell.walls[0]:  # top
-			qp.drawLine(x    , y    , x + WIDTH, y)
-		if cell.walls[1]:  # right
-			qp.drawLine(x + WIDTH, y    , x + WIDTH, y + WIDTH)
-		if cell.walls[2]:  # bottom
-			qp.drawLine(x + WIDTH, y + WIDTH, x    , y + WIDTH)
-		if cell.walls[3]:  # left
-			qp.drawLine(x    , y + WIDTH, x    , y)
-		forcecolor = self.centerPressure.intensity / 5
-		qp.setBrush(QColor(int(max(0,min(255,forcecolor*cell.intensity*self.centerPressure.intensity/10)), max(0,min(255,((1.0 - forcecolor) * cell.intensity*self.centerPressure.intensity/10))) , 0, 200)))
-		qp.drawRect(x, y, WIDTH, WIDTH)
 
 	def draw_single_cell(self, cell):
 		x = cell.i * WIDTH
@@ -474,29 +229,13 @@ class App(QWidget):
 		qp.setBrush(QColor(int(max(0,min(255,forcecolor*cell.intensity))), int(max(0,min(255,((1.0 - forcecolor) * cell.intensity)))) , 0, 200))
 		qp.drawRect(x, y, WIDTH, WIDTH)
 
-
-	def draw_cell(self, cell):
-		x = cell.i * WIDTH
-		y = cell.j * WIDTH
-		# LINES
-		qp = QPainter(self)
-		qp.setPen(QPen(Qt.black, 1, Qt.SolidLine))
-		if cell.walls[0]:  # top
-			qp.drawLine(x    , y    , x + WIDTH, y)
-		if cell.walls[1]:  # right
-			qp.drawLine(x + WIDTH, y    , x + WIDTH, y + WIDTH)
-		if cell.walls[2]:  # bottom
-			qp.drawLine(x + WIDTH, y + WIDTH, x    , y + WIDTH)
-		if cell.walls[3]:  # left
-			qp.drawLine(x    , y + WIDTH, x    , y)
-			qp.drawRect(x, y, WIDTH, WIDTH)
-
-
-
 if __name__ == '__main__':
 
 	app = QApplication(sys.argv)
 	ex = App()
 	sys.exit(app.exec_())
+
+
+
 
 

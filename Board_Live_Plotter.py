@@ -1,6 +1,7 @@
 import sys, math, random, queue, threading, time
 import pyautogui
 import serial
+import xlrd
 import numpy as np
 from PyQt5.QtWidgets import QApplication, QWidget, QShortcut
 from PyQt5.QtGui import QPainter, QPen, QColor, QKeySequence, QMouseEvent
@@ -16,7 +17,7 @@ lasttime = 0
 hz = 0
 ser = serial.Serial('COM10',timeout=5)
 ser.baudrate = 115200	
-#ser.timeout = 0            # non blocking read
+#ser.timeout = 0            # non blocking read	
 data = [0,0,0,0,0,0,0,0]
 datamem = np.array([[0 for x in range(8)] for y in range(200)] )
 dataout = np.array([[0 for x in range(8)] for y in range(200)] )
@@ -24,12 +25,26 @@ latchvalues =  np.array([0 for x in range(8)])
 fig, ax = plt.subplots()
 fig2, ax2 = plt.subplots()
 count = 1
+dim1 = 24; dim2 = 10; dim3 = 8
 ax.axis([0,200,0,100000])
-ax2.axis([-0.35,0.35,-0.25,0.25])
+ax2.axis([-1,dim1, -1, dim2])
 
 plt.show(block=False)
 
-points = [[1/8,1/4],[3/8,1/4],[5/8,1/4],[7/8,1/4],[7/8,3/4],[5/8,3/4],[3/8,3/4],[1/8,3/4]]
+loc = ("Calibration.xlsx")
+ 
+wb = xlrd.open_workbook(loc)
+sheet = wb.sheet_by_index(0)
+
+
+
+Calibration = np.zeros((dim1, dim2, dim3))
+Calibration [0][0][0] = 1
+
+for i in range (0,dim1):
+	for j in range (0,dim2):
+		for k in range (0,dim3):
+			Calibration[i][j][k] = sheet.cell_value( i,j+10*k)
 
 
 lines = [None]*8
@@ -39,7 +54,17 @@ lines = [None]*8
 for i in range(0,8):
 	lines[i], = ax.plot(np.zeros(200))
 
-plotpoint, = ax2.plot(105,200,'ro') 
+# plotpoint, = ax2.plot(105,200,'ro') 
+
+xlist = zeros(dim1*dim2);
+ylist = zeros(dim1*dim2);
+
+for i in range (0,dim2):
+	for j in range (0,dim1):
+		xlist[i*dim1 +j] = j
+		ylist[i*dim1 +j] = i
+scatterpoint = ax2.scatter(xlist,ylist, marker="s",s=900) 
+ax2.set_aspect('equal')
 
 peakcounter = 0
 state = 0
@@ -85,42 +110,63 @@ while(1):
 
 
 	# print(np.shape(np.append(dataout, dataarray - datamem[194,:].reshape((1,8)), axis=0)))
-
-
+	dataoutpoint = dataarray.copy()
 	if(state == 0):
-		dataout = np.append(dataout, dataarray - datamem[196,:].reshape((1,8)), axis=0)
-		# for i in range(0,8):
-		# 	dataout[195,i] = datamem[195,i] - datamem[194,i]
-		# 	dataout[196,i] = datamem[196,i] - datamem[194,i]
-		# 	dataout[197,i] = datamem[197,i] - datamem[194,i]
-		# 	dataout[198,i] = datamem[198,i] - datamem[194,i]
-		# 	dataout[199,i] = datamem[199,i] - datamem[194,i]
+		dataoutpoint = dataarray - datamem[196,:].reshape((1,8))
+		dataout = np.append(dataout,dataoutpoint, axis=0)
 
 	point  = [0,0]
-	dataoutpoint = dataarray.copy()
 	if(state == 1):
 		dataoutpoint = dataarray - latchvalues.reshape((1,8))
 		dataout = np.append(dataout, dataoutpoint, axis=0)
-		for i in range(0,8):
-			point = [point[0] + (dataoutpoint[0,i]-np.mean(dataoutpoint[0]))*points[i][0]/sum(np.absolute(dataoutpoint[0])), point[1] +(dataoutpoint[0,i]-np.mean(dataoutpoint[0]))*points[i][1]/sum(np.absolute(dataoutpoint[0]))]
-		print(point)
-
-		# for i in range(0,8):
-		# 	dataout[195,i] = datamem[195,i] - latchvalues[i]
-		# 	dataout[196,i] = datamem[196,i] - latchvalues[i]
-		# 	dataout[197,i] = datamem[197,i] - latchvalues[i]
-		# 	dataout[198,i] = datamem[198,i] - latchvalues[i]
-		# 	dataout[199,i] = datamem[199,i] - latchvalues[i]
-
-	#print(dataoutpoint[0,1])
-	# print(points[0][1])
-
-
 
 	peakness = 1
 	i = 0
+
+
+	# print(dataoutpoint[0])
+
+	datapoint = dataoutpoint[0]
+	ratios = np.zeros(8)
+	matchs = np.zeros((24,10))
+	averageMatch = 0
+
+	if 0 in dataoutpoint[0]:
+		ratios = np.ones(8)
+	else:
+		for i in range (0,24):
+			for j in range (0,10):
+				average = 0
+				for k in range (0,8):
+					average = average + abs(datapoint[k]/8)
+				for k in range (0,8):
+					ratios[k] = datapoint[k] / average
+				match = 0
+				for k in range (0,8):
+					match = match + abs(ratios[k] - Calibration[i][j][k])/8
+				matchs[i][j] = match
+				
+	# print(matchs)
+
+	highest = 10000000000
+	pos = [0,0]
+	for i in range (0,24):
+		for j in range (0,10):
+			if matchs[i][j] < highest:
+				highest = matchs[i][j]
+				pos = [i,j]
+
+	intense = 0
+	for i in range(0,8):
+		intense = intense + abs(datapoint[i]/Calibration[pos[0]][pos[1]][i])
+ 
+	intense = math.sqrt(intense)
+
+	#print (intense)
+
+	i = 0
 	for line in lines:
-		line.set_ydata(dataout[:,i])
+		# line.set_ydata(dataout[:,i])
 		peakness = peakness * (abs((datamem[196,i]-datamem[195,i])) + abs((datamem[198,i]-datamem[199,i])))/100
 		i = i + 1
 
@@ -128,35 +174,76 @@ while(1):
 		# bar, = ax.plot((197,197),(np.amin(datamem[197,:].copy()),np.amax(datamem[197,:].copy())))
 		# bars.append(bar)
 		
-		peakcounter = 3
+		peakcounter = 5
 		if(state == 0):
 			for i in range(0,8):
 				latchvalues[i] = datamem[196,i];
 
 		state = 1
 			
-	if (peakness < 5 and state == 1):
+	if (peakness < 100 and state == 1):
 		peakcounter = peakcounter - 1
 		if(peakcounter == 0):
 			state = 0
+	else:
+		peakcounter = 3
 
+	#print(peakness)
 	# for bar in bars:
 	# 	xbar = bar.get_xdata()
 	# 	bar.set_xdata([xbar[0] -1,xbar[0] -1])
 	# 	if xbar[0] == 150:
 	# 		bar.remove()
 	# 		bars.remove(bar)
-
-
 	#bar.set_ydata([np.amin(datamem)-500,np.amax(datamem)+500])
-	ax.axis([0,200,min(-700,np.amin(dataout)-500),max(700, np.amax(dataout)+500)])
+	#ax.axis([0,200,min(-700,np.amin(dataout)-500),max(700, np.amax(dataout)+500)])
 	
+	colors = []
+	worstmatch = 0
+	for i in range (0,dim1):
+		for j in range (0,dim2):
+			if(matchs[i][j] > worstmatch):
+				worstmatch = matchs[i][j]
+	# unitmatchs = zeros((dim1,dim2))
+	# for i in range (0,dim1):
+	# 	for j in range (0,dim2):
+	# 		unitmatchs[i][j] = highest / matchs[i][j]
 
-	plotpoint.set_xdata(-point[0])
-	plotpoint.set_ydata(point[1])
 
-	fig.canvas.draw()
-	fig.canvas.flush_events()
+	# unitbest = highest/worstmatch
+	print(highest)
+	print(worstmatch)
+	print(" ")
+
+	if (state == 1):
+		for i in range (0,dim2):
+			for j in range (0,dim1):
+				if(pos[1] == i and pos[0] == j):
+					colors.append((1,1,1))
+				elif(matchs[j][i] > (1.6*highest)):
+					colors.append((0,0,0))	
+				elif(matchs[j][i] > 1.2*highest):
+					colors.append((1,0,0))
+				else:
+					colors.append((0.8,0.8,0.8))	
+	else:
+		for i in range (0,dim2):
+			for j in range (0,dim1):
+				colors.append((0,0,0))
+
+	# print(colors)
+	#rng = np.random.RandomState(0)
+	#colors = rng.rand(240)
+	#scatterpoint, = ax2.plot(xlist,ylist,'ro',  c = colors)
+
+	scatterpoint.set_color(colors)
+	# plotpoint.set_ydata(pos[1])
+
+	# fig.canvas.draw()
+	# fig.canvas.flush_events()
+
+
+
 
 	fig2.canvas.draw()
 	fig2.canvas.flush_events()
