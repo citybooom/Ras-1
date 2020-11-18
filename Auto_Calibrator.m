@@ -1,6 +1,8 @@
 
+dim1 = 12;
+dim2 = 32;
 
-A = fileread("Test19_C1_beeg.txt");
+A = fileread("Test_2_S3.txt");
 count = 1;
 lasti = 1;
 lineArray = ["Start"];
@@ -28,7 +30,7 @@ for i = (1:length(lineArray))
     dataArray{i} = str2num(strrep(lineArray(i),'_',' '));
 end
 
-DataSets = cell(10,24);
+DataSets = cell(dim1,dim2);
 
 first = 1;
 pos = dataArray{1};
@@ -44,11 +46,11 @@ for i = (2:length(dataArray))
 end
 DataSets{pos(1),pos(2)} = dataCache;
 
-Readings = zeros(10,24,8);
+Readings = zeros(dim1,dim2,8);
 
 
-for i = 1:10
-    for j = 1:24
+for i = 1:dim1
+    for j = 1:dim2
         tempdata = DataSets{i,j};
         BaselineData = tempdata(length(tempdata) - 10:length(tempdata),:);
         Baselines = mean(BaselineData);
@@ -64,7 +66,7 @@ for i = 1:10
     end
 end
 
-Ratios = zeros(10,24,8);
+Ratios = zeros(dim1,dim2,8);
 
 for i = 1:length(DataSets(:,1))
     for j = 1:length(DataSets(1,:))
@@ -78,73 +80,91 @@ for i = 1:length(DataSets(:,1))
     end
 end
 
-matcharray = zeros(240,240);
+MaxRatios = zeros(dim1,dim2,8);
 
-
-for i = 1:10
-    for j = 1:24
-       for x = 1:10
-            for y = 1:24
-            match = 0;
-                for z = 1:8
-                    match = match + abs(Ratios(i,j,z) - golden_ratio(x,y,z));
-                end
-            matcharray((i-1)*24+j, (x-1)*24+y) = match;
-            end
-        end
-    end
-end
-
-estimate = zeros(240,1);
-errors  = zeros(240,1);
-for i = 1:240
-    mini = matcharray(1,i);
-    mindex = 1;
-    for j = 2:240
-        if abs(matcharray(j,i)) < abs(mini)
-            mini = matcharray(j,i);
-            mindex = j;
-        end
-    end
-    estimate(i) = mindex;
-    errors(i) = round((estimate(i) - i)/24);
-    errors(i) = errors(i) + (estimate(i) - i )- errors(i)*24;
-end
-
-correctcount = 0;
-closecount = 0;
-for i = 5:240
-    if errors(i) == 0
-        correctcount = correctcount + 1;
-    end
-    if errors(i) <= 2
-        closecount = closecount + 1;
-    end
-end
-
-Visual = zeros(10,24);
-for i = 1:10
-    for j = 1:24
-        match = 0;
+for i = 1:length(DataSets(:,1))
+    for j = 1:length(DataSets(1,:))
+        Max = 0;
         for k = 1:8
-             match = match + min(0,golden_ratio(i,j,k)- Ratios(i,j,k));
-             %match = match + abs(oldratios(i,j,k)- Ratios(i,j,k));
+          if(Readings(i,j,k) > Max)
+              Max = Readings(i,j,k);
+          end
         end
-        if(abs(match) < 300000)
-            Visual(i,j) = match;
-        end
+        for k = 1:8
+           MaxRatios(i,j,k) = Readings(i,j,k)/Max;
+        end    
     end
 end
 
-ErrorVisual = zeros(10,24);
 
-for i = 1:10
-    for j = 1:24
-        ErrorVisual(i,j) = errors((i-1)*24 + j);
-    end
-end
-%hold on
-surf(ErrorVisual);
+% matcharray = zeros(240,240);
+
+
+% for i = 1:dim1
+%     for j = 1:dim2
+%        for x = 1:dim1
+%             for y = 1:dim2
+%             match = 0;
+%                 for z = 1:8
+%                     match = match + abs(Ratios(i,j,z) - golden_ratio(x,y,z));
+%                 end
+%             matcharray((i-1)*24+j, (x-1)*24+y) = match;
+%             end
+%         end
+%     end
+% end
+% 
+% estimate = zeros(240,1);
+% errors  = zeros(240,1);
+% for i = 1:240
+%     mini = matcharray(1,i);
+%     mindex = 1;
+%     for j = 2:240
+%         if abs(matcharray(j,i)) < abs(mini)
+%             mini = matcharray(j,i);
+%             mindex = j;
+%         end
+%     end
+%     estimate(i) = mindex;
+%     errors(i) = round((estimate(i) - i)/24);
+%     errors(i) = errors(i) + (estimate(i) - i )- errors(i)*24;
+% end
+% 
+% correctcount = 0;
+% closecount = 0;
+% for i = 5:240
+%     if errors(i) == 0
+%         correctcount = correctcount + 1;
+%     end
+%     if errors(i) <= 2
+%         closecount = closecount + 1;
+%     end
+% end
+% 
+% Visual = zeros(dim1,dim2);
+% for i = 1:dim1
+%     for j = 1:dim2
+%         
+%         match = 0;
+%         for k = 1:8
+%              match = match + min(0,golden_ratio(i,j,k)- Ratios(i,j,k));
+%              %match = match + abs(oldratios(i,j,k)- Ratios(i,j,k));
+%         end
+%         if(abs(match) < 300000)
+%             Visual(i,j) = match;
+%         end
+%     end
+% end
+% 
+% ErrorVisual = zeros(dim1,dim2);
+% 
+% for i = 1:dim1
+%     for j = 1:dim2
+%         ErrorVisual(i,j) = errors((i-1)*dim2 + j);
+%     end
+% end
+% %hold on
+% surf(ErrorVisual);
 % daspect([1 1 10]);
 
 %hold off

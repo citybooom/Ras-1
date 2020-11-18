@@ -13,8 +13,8 @@ LiquidCrystal lcd(12, 11, A0, A1, A2, A3);
 
 
 int StepperWaitCycles = 1;
-int StepperMoveSteps_Y = 26;
-int StepperMoveSteps_X = 10;
+int StepperMoveSteps_Y = 32;
+int StepperMoveSteps_X = 12;
 int StepperPos_Y;
 int StepperPos_X;
 int StepTime = 1000;

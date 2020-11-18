@@ -76,8 +76,8 @@ class App(QWidget):
 		self.dataout = [1,1,1,1,1,1,1,1] 
 		self.datafiltered = [1,1,1,1,1,1,1,1] 
 		self.first = 100
-		self.ser = serial.Serial('COM4',timeout=5)
-		self.ser.baudrate = 2000000
+		self.ser = serial.Serial('COM10',timeout=5)
+		self.ser.baudrate = 57600
 		self.pressed = 0
 		self.left = 0
 		self.top = 0
@@ -185,29 +185,26 @@ class App(QWidget):
 				hz = 1/(temptime - self.time)
 			self.time = temptime
 			#print(str(hz) + " Hz")
-			while(self.ser.read() != b'k'):
+			
+			while(self.ser.read() != b':'):
 				pass
+
 			self.ser.read()
-					
-			tdata = self.ser.read(zz)
-			#print (tdata)
+			tdata = self.ser.read(81)
+
 			charcounter = 0
 			tempdata = []
-			for character in tdata:
-				if charcounter == 92:
-					self.data[charcounter] = float(bytes(tempdata).decode("utf-8"))
-					break
-				if character != 32:
-					tempdata.append(character)
-				else:
-					if(not tempdata):
-						continue
-					if charcounter == 8:
-						break	
-					self.data[charcounter] = float(bytes(tempdata).decode("utf-8"))
-					tempdata = []
-					charcounter = charcounter + 1
-					
+			i = 0
+			while(i < 71):
+				try:
+					self.data[charcounter] = float(bytes(tdata[i:i+11]).decode("utf-8"))
+				except ValueError:
+					pass
+				
+				charcounter = charcounter + 1
+				i = i + 10
+
+			# dataarray = np.array(self.data.copy()).reshape((1,8))
 				
 
 			if(self.first > 0):

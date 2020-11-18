@@ -77,7 +77,7 @@ class App(QWidget):
 		self.datafiltered = [1,1,1,1,1,1,1,1] 
 		self.first = 1000
 		self.ser = serial.Serial('COM10',timeout=5)
-		self.ser.baudrate = 115200
+		self.ser.baudrate = 57600
 		self.pressed = 0
 		self.left = 0
 		self.top = 0

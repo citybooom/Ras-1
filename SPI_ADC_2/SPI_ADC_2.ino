@@ -34,12 +34,12 @@ long tempdata3 = 0;
 double j;
 long timer = 0;
 int buffercounter = 0;
-int chargingtimer = 10000;
+int chargingtimer = 10;
 
 
 byte res = 0;
 int first = 1;
-double EMA_a = 0.0001;    //initialization of EMA alpha
+double EMA_a = 0.002;    //initialization of EMA alpha
 long EMA_S = 0;        //initialization of EMA S
 long highpass = 0;
 
@@ -66,7 +66,7 @@ void setup()
   pinMode(DATA_READY, INPUT);
   digitalWrite(RESET, HIGH);
   digitalWrite(SSpot, HIGH);
-  Serial.begin(115200);
+  Serial.begin(57600);
 
 
   //Initialize SPI
