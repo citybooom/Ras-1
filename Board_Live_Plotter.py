@@ -11,31 +11,12 @@ import matplotlib.pyplot as plt
 from numpy import sin, linspace, pi
 from pylab import plot, show, title, xlabel, ylabel, subplot
 from sklearn.linear_model import LinearRegression
-from pynput import keyboard
-
-global state
-def on_press(key):
-	if(format(key) == "Key.space"):
-		print("reset")
-		global state
-		state = 0
-	# try:
-	#     print('alphanumeric key {0} pressed'.format(
-	#         key.char))
-	# except AttributeError:
-	#     print('special key {0} pressed'.format(
-	#         key))
-
-listener = keyboard.Listener(
-    on_press=on_press)
-listener.start()
-
 
 timenow = 0
 lasttime = 0
 hz = 0
 ser = serial.Serial('COM10',timeout=5)
-ser.baudrate = 57600	
+ser.baudrate = 115200	
 #ser.timeout = 0            # non blocking read	
 data = [0,0,0,0,0,0,0,0]
 datamem = np.array([[0 for x in range(8)] for y in range(200)] )
@@ -44,7 +25,7 @@ latchvalues =  np.array([0 for x in range(8)])
 fig, ax = plt.subplots()
 fig2, ax2 = plt.subplots()
 count = 1
-dim1 = 30; dim2 = 12; dim3 = 8
+dim1 = 24; dim2 = 10; dim3 = 8
 ax.axis([0,200,0,100000])
 ax2.axis([-1,dim1, -1, dim2])
 
@@ -63,12 +44,12 @@ Calibration [0][0][0] = 1
 for i in range (0,dim1):
 	for j in range (0,dim2):
 		for k in range (0,dim3):
-			Calibration[i][j][k] = sheet.cell_value( i,j+dim2*k)
+			Calibration[i][j][k] = sheet.cell_value( i,j+10*k)
 
 
 lines = [None]*8
-bar1, = ax.plot((100,100),(0,20000))
-bars = [bar1]
+# bar1, = ax.plot((100,100),(0,20000))
+# bars = [bar1]
 
 for i in range(0,8):
 	lines[i], = ax.plot(np.zeros(200))
@@ -147,14 +128,14 @@ while(1):
 
 	datapoint = dataoutpoint[0]
 	ratios = np.zeros(8)
-	matchs = np.zeros((dim1,dim2))
+	matchs = np.zeros((24,10))
 	averageMatch = 0
 
 	if 0 in dataoutpoint[0]:
 		ratios = np.ones(8)
 	else:
-		for i in range (0,dim1):
-			for j in range (0,dim2):
+		for i in range (0,24):
+			for j in range (0,10):
 				average = 0
 				for k in range (0,8):
 					average = average + abs(datapoint[k]/8)
@@ -164,74 +145,58 @@ while(1):
 				for k in range (0,8):
 					match = match + abs(ratios[k] - Calibration[i][j][k])/8
 				matchs[i][j] = match
-
-
-	# if 0 in dataoutpoint[0]:
-	# 	ratios = np.ones(8)
-	# else:
-	# 	for i in range (0,dim1):
-	# 		for j in range (0,dim2):
-	# 			Max = 0
-	# 			for k in range (0,8):
-	# 				if (datapoint[k]) > Max:
-	# 					Max = datapoint[k]
-	# 			for k in range (0,8):
-	# 				ratios[k] = datapoint[k] / Max
-	# 			match = 0
-	# 			for k in range (0,8):
-	# 				match = match + abs(Calibration[i][j][k] - ratios[k])/8
-	# 			matchs[i][j] = match
 				
 	# print(matchs)
 
 	highest = 10000000000
 	pos = [0,0]
-	for i in range (0,dim1):
-		for j in range (0,dim2):
+	for i in range (0,24):
+		for j in range (0,10):
 			if matchs[i][j] < highest:
 				highest = matchs[i][j]
 				pos = [i,j]
 
-	intense = max(datapoint)
+	intense = 0
+	for i in range(0,8):
+		intense = intense + abs(datapoint[i]/Calibration[pos[0]][pos[1]][i])
+ 
+	intense = math.sqrt(intense)
 
-	intense = math.sqrt(math.sqrt(math.sqrt(abs(intense))))
-	#print(intense)
 	#print (intense)
 
 	i = 0
 	for line in lines:
-		line.set_ydata(dataout[:,i])
+		# line.set_ydata(dataout[:,i])
 		peakness = peakness * (abs((datamem[196,i]-datamem[195,i])) + abs((datamem[198,i]-datamem[199,i])))/100
 		i = i + 1
 
-	if (peakness > 10000):
+	if (peakness > 100):
 		# bar, = ax.plot((197,197),(np.amin(datamem[197,:].copy()),np.amax(datamem[197,:].copy())))
 		# bars.append(bar)
 		
 		peakcounter = 5
 		if(state == 0):
 			for i in range(0,8):
-				latchvalues[i] = datamem[196,i]
+				latchvalues[i] = datamem[196,i];
+
 		state = 1
-
-		
 			
-	# if (peakness < 5000 and state == 1):
-	# 	peakcounter = peakcounter - 1
-	# 	if(peakcounter == 0):
-	# 		state = 0
-	# else:
-	# 	peakcounter = 3
+	if (peakness < 100 and state == 1):
+		peakcounter = peakcounter - 1
+		if(peakcounter == 0):
+			state = 0
+	else:
+		peakcounter = 3
 
-	
-	for bar in bars:
-		xbar = bar.get_xdata()
-		bar.set_xdata([xbar[0] -1,xbar[0] -1])
-		if xbar[0] == 150:
-			bar.remove()
-			bars.remove(bar)
-	bar.set_ydata([np.amin(datamem)-500,np.amax(datamem)+500])
-	ax.axis([0,200,min(-700,np.amin(dataout)-500),max(700, np.amax(dataout)+500)])
+	#print(peakness)
+	# for bar in bars:
+	# 	xbar = bar.get_xdata()
+	# 	bar.set_xdata([xbar[0] -1,xbar[0] -1])
+	# 	if xbar[0] == 150:
+	# 		bar.remove()
+	# 		bars.remove(bar)
+	#bar.set_ydata([np.amin(datamem)-500,np.amax(datamem)+500])
+	#ax.axis([0,200,min(-700,np.amin(dataout)-500),max(700, np.amax(dataout)+500)])
 	
 	colors = []
 	worstmatch = 0
@@ -246,23 +211,21 @@ while(1):
 
 
 	# unitbest = highest/worstmatch
-	# print(peakness)
-	# print(highest)
-	# print(intense)
-	# print(" ")
+	print(highest)
+	print(worstmatch)
+	print(" ")
 
-
-	intenseColor = min(1,intense*0.2)
 	if (state == 1):
 		for i in range (0,dim2):
 			for j in range (0,dim1):
 				if(pos[1] == i and pos[0] == j):
 					colors.append((1,1,1))
-				elif(matchs[j][i] > (1.1)):
+				elif(matchs[j][i] > (1.6*highest)):
 					colors.append((0,0,0))	
+				elif(matchs[j][i] > 1.2*highest):
+					colors.append((1,0,0))
 				else:
-					colors.append((intenseColor,0,1-intenseColor))
-				# print(matchs[j][i])	
+					colors.append((0.8,0.8,0.8))	
 	else:
 		for i in range (0,dim2):
 			for j in range (0,dim1):
@@ -276,8 +239,8 @@ while(1):
 	scatterpoint.set_color(colors)
 	# plotpoint.set_ydata(pos[1])
 
-	fig.canvas.draw()
-	fig.canvas.flush_events()
+	# fig.canvas.draw()
+	# fig.canvas.flush_events()
 
 
 
