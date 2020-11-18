@@ -10,7 +10,7 @@ from scipy import zeros, signal, random, fft, arange
 import matplotlib.pyplot as plt
 from numpy import sin, linspace, pi
 from pylab import plot, show, title, xlabel, ylabel, subplot
-from sklearn.linear_model import LinearRegression
+# from sklearn.linear_model import LinearRegression
 from pynput import keyboard
 
 global state
@@ -31,10 +31,13 @@ listener = keyboard.Listener(
 listener.start()
 
 
+
 timenow = 0
 lasttime = 0
 hz = 0
-ser = serial.Serial('COM10',timeout=5)
+
+ser = serial.Serial('COM3',timeout=5)
+
 ser.baudrate = 57600	
 #ser.timeout = 0            # non blocking read	
 data = [0,0,0,0,0,0,0,0]
