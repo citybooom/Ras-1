@@ -36,13 +36,13 @@ timenow = 0
 lasttime = 0
 hz = 0
 
-ser = serial.Serial('COM3',timeout=5)
+ser = serial.Serial('COM4',timeout=5)
 
 ser.baudrate = 57600	
 #ser.timeout = 0            # non blocking read	
 data = [0,0,0,0,0,0,0,0]
-datamem = np.array([[0 for x in range(8)] for y in range(200)] )
-dataout = np.array([[0 for x in range(8)] for y in range(200)] )
+datamem = np.array([[0 for x in range(8)] for y in range(200)])
+dataout = np.array([[0 for x in range(8)] for y in range(200)])
 latchvalues =  np.array([0 for x in range(8)])
 fig, ax = plt.subplots()
 fig2, ax2 = plt.subplots()
@@ -70,16 +70,14 @@ for i in range (0,dim1):
 
 
 lines = [None]*8
-bar1, = ax.plot((100,100),(0,20000))
-bars = [bar1]
 
 for i in range(0,8):
 	lines[i], = ax.plot(np.zeros(200))
 
 # plotpoint, = ax2.plot(105,200,'ro') 
 
-xlist = zeros(dim1*dim2);
-ylist = zeros(dim1*dim2);
+xlist = np.zeros(dim1*dim2);
+ylist = np.zeros(dim1*dim2);
 
 for i in range (0,dim2):
 	for j in range (0,dim1):
@@ -152,6 +150,10 @@ while(1):
 	ratios = np.zeros(8)
 	matchs = np.zeros((dim1,dim2))
 	averageMatch = 0
+	bestmatch = 100000
+	pos = [0,0]
+	worstmatch = 0
+	average = 0
 
 	if 0 in dataoutpoint[0]:
 		ratios = np.ones(8)
@@ -164,11 +166,20 @@ while(1):
 				for k in range (0,8):
 					ratios[k] = datapoint[k] / average
 				match = 0
-				for k in range (0,8):
-					match = match + abs(ratios[k] - Calibration[i][j][k])/8
+				maxk = 0
+				penk = 0
+				for k in range (1,8):
+					match = match + abs(ratios[k] - Calibration[i][j][k])
 				matchs[i][j] = match
+				if matchs[i][j] > worstmatch:
+					worstmatch = matchs[i][j]
+				if matchs[i][j] < bestmatch:
+					bestmatch = matchs[i][j]
+					pos = [i,j]
 
-
+	for i in range (0,dim1):
+		for j in range (0,dim2):
+			matchs[i][j] = (matchs[i][j] - bestmatch)/(worstmatch - bestmatch)
 	# if 0 in dataoutpoint[0]:
 	# 	ratios = np.ones(8)
 	# else:
@@ -187,16 +198,8 @@ while(1):
 				
 	# print(matchs)
 
-	highest = 10000000000
-	pos = [0,0]
-	for i in range (0,dim1):
-		for j in range (0,dim2):
-			if matchs[i][j] < highest:
-				highest = matchs[i][j]
-				pos = [i,j]
 
 	intense = max(datapoint)
-
 	intense = math.sqrt(math.sqrt(math.sqrt(abs(intense))))
 	#print(intense)
 	#print (intense)
@@ -226,22 +229,9 @@ while(1):
 	# else:
 	# 	peakcounter = 3
 
-	
-	for bar in bars:
-		xbar = bar.get_xdata()
-		bar.set_xdata([xbar[0] -1,xbar[0] -1])
-		if xbar[0] == 150:
-			bar.remove()
-			bars.remove(bar)
-	bar.set_ydata([np.amin(datamem)-500,np.amax(datamem)+500])
 	ax.axis([0,200,min(-700,np.amin(dataout)-500),max(700, np.amax(dataout)+500)])
 	
 	colors = []
-	worstmatch = 0
-	for i in range (0,dim1):
-		for j in range (0,dim2):
-			if(matchs[i][j] > worstmatch):
-				worstmatch = matchs[i][j]
 	# unitmatchs = zeros((dim1,dim2))
 	# for i in range (0,dim1):
 	# 	for j in range (0,dim2):
@@ -255,38 +245,57 @@ while(1):
 	# print(" ")
 
 
-	intenseColor = min(1,intense*0.2)
-	if (state == 1):
-		for i in range (0,dim2):
-			for j in range (0,dim1):
-				if(pos[1] == i and pos[0] == j):
-					colors.append((1,1,1))
-				elif(matchs[j][i] > (1.1)):
-					colors.append((0,0,0))	
-				else:
-					colors.append((intenseColor,0,1-intenseColor))
-				# print(matchs[j][i])	
-	else:
-		for i in range (0,dim2):
-			for j in range (0,dim1):
-				colors.append((0,0,0))
 
 	# print(colors)
 	#rng = np.random.RandomState(0)
 	#colors = rng.rand(240)
 	#scatterpoint, = ax2.plot(xlist,ylist,'ro',  c = colors)
 
+	points = [[0,1],[2/8,1],[6/8,1],[1,1],[1,0],[6/8,0],[4/8,0],[0,0 ]]
+
+	ante_pos = [0,0];
+	
+	if(average):
+		for k in range (0,dim3):
+			ante_pos[0] = ante_pos[0] + points[k][0]*datapoint[k]/(average*8);
+			ante_pos[1] = ante_pos[1] + points[k][1]*datapoint[k]/(average*8);
+		
+		ante_pos[0] = min(dim1,max(0, round(ante_pos[0]*dim1)))
+		ante_pos[1] = min(dim2,max(0, round(ante_pos[1]*dim2)))
+		print(ante_pos);
+
+	intenseColor = min(1,intense*0.2)
+	if (state == 1):
+		for i in range (0,dim2):
+			for j in range (0,dim1):
+				if(pos[1] == i and pos[0] == j):
+					colors.append((1,1,1))
+				if(ante_pos[1] == i and ante_pos[0] == j):
+					colors.append((0,1,0))
+				else:
+					colors.append((matchs[j][i] ,0,1-matchs[j][i] ))
+				# print(matchs[j][i])	
+	else:
+		for i in range (0,dim1):
+			for j in range (0,dim2):
+				colors.append((0,0,0))
+
+				
+
+
+
 	scatterpoint.set_color(colors)
 	# plotpoint.set_ydata(pos[1])
 
 	fig.canvas.draw()
 	fig.canvas.flush_events()
+	# print(Calibration)
 
-
-
+	ser.flushInput()
 
 	fig2.canvas.draw()
 	fig2.canvas.flush_events()
+
 
 
 	# print(peakness)

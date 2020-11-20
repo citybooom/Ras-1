@@ -39,7 +39,7 @@ int chargingtimer = 10;
 
 byte res = 0;
 int first = 1;
-double EMA_a = 0.002;    //initialization of EMA alpha
+double EMA_a = 0.00001;    //initialization of EMA alpha
 long EMA_S = 0;        //initialization of EMA S
 long highpass = 0;
 
@@ -160,7 +160,15 @@ void loop()
   EMA_S = (EMA_a * (dataave)) + ((1 - EMA_a) * EMA_S);
   highpass = (dataave) - EMA_S;
   //highpass = 0;
-
+  
+//  if (highpass > 10000) {
+//    highpass = 10000;
+//    dataave = EMA_S + 10000;
+//  }
+//  if (highpass < -10000) {
+//    highpass = -10000;
+//    dataave = EMA_S - 10000;
+//  }
   for (int i = 0; i < 8; i++) {
     dataprefilt[i] = readings[i] - firstreadings[i];
     datafilt[i] =  dataprefilt[i] - highpass;

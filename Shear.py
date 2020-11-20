@@ -10,7 +10,7 @@ from scipy import zeros, signal, random, fft, arange
 import matplotlib.pyplot as plt
 from numpy import sin, linspace, pi
 from pylab import plot, show, title, xlabel, ylabel, subplot
-from sklearn.linear_model import LinearRegression
+# from sklearn.linear_model import LinearRegression
 from pynput import keyboard
 
 global state
@@ -34,7 +34,7 @@ listener.start()
 timenow = 0
 lasttime = 0
 hz = 0
-ser = serial.Serial('COM10',timeout=5)
+ser = serial.Serial('COM6',timeout=5)
 ser.baudrate = 57600	
 #ser.timeout = 0            # non blocking read	
 data = [0,0,0,0,0,0,0,0]
@@ -136,6 +136,7 @@ while(1):
 		dataoutpoint = dataarray - datamem[196,:].reshape((1,8))
 		dataout = np.append(dataout,dataoutpoint, axis=0)
 
+
 	point  = [0,0]
 	if(state == 1):
 		dataoutpoint = dataarray - latchvalues.reshape((1,8))
@@ -206,7 +207,7 @@ while(1):
 		peakness = peakness * (abs((datamem[196,i]-datamem[195,i])) + abs((datamem[198,i]-datamem[199,i])))/100
 		i = i + 1
 
-	if (peakness > 10000):
+	if (peakness > 0):
 		# bar, = ax.plot((197,197),(np.amin(datamem[197,:].copy()),np.amax(datamem[197,:].copy())))
 		# bars.append(bar)
 		
@@ -214,10 +215,11 @@ while(1):
 		if(state == 0):
 			for i in range(0,8):
 				latchvalues[i] = datamem[196,i]
-		state = 1
+			state = 1
 
 		
-			
+	ser.flushInput()
+		
                                               
 
 	
@@ -279,8 +281,8 @@ while(1):
 	print(shear_x)
 	print(shear_y)
 
-	shear.set_xdata([0,shear_x])
-	shear.set_ydata([0,shear_y])
+	shear.set_xdata([0,0])
+	shear.set_ydata([0,shear_x*10])
 
 
 	fig.canvas.draw()
