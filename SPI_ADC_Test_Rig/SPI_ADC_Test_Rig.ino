@@ -64,7 +64,7 @@ void setup()
   pinMode(DATA_READY, INPUT);
   digitalWrite(RESET, HIGH);
   digitalWrite(SSpot, HIGH);
-  Serial.begin(115200);
+  Serial.begin(57600);
 
 
   //Initialize SPI
