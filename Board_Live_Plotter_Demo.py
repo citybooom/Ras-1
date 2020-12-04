@@ -299,8 +299,8 @@ while(1):
 	scatterpoint.set_color(colors)
 	# plotpoint.set_ydata(pos[1])
 
-	fig.canvas.draw()
-	fig.canvas.flush_events()
+	# fig.canvas.draw()
+	# fig.canvas.flush_events()
 	# print(Calibration)
 
 	ser.flushInput()

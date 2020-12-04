@@ -2,7 +2,7 @@
 dim1 = 12;
 dim2 = 32;
 
-A = fileread("Test_1_C4.txt");
+A = fileread("Test_2_S3.txt");
 count = 1;
 lasti = 1;
 lineArray = ["Start"];

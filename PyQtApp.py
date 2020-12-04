@@ -9,7 +9,7 @@ from scipy import zeros, signal, random, fft, arange
 import matplotlib.pyplot as plt
 from numpy import sin, linspace, pi
 from pylab import plot, show, title, xlabel, ylabel, subplot
-from sklearn.linear_model import LinearRegression
+# from sklearn.linear_model import LinearRegression
 
 
 
@@ -64,7 +64,7 @@ def plotSpectrum(y,Fs):
 class App(QWidget):
 	def __init__(self):
 		super().__init__()
-		self.WLS = LinearRegression()
+		# self.WLS = LinearRegression()
 		self.fitted = 0
 		self.time = 0
 		self.data1mem = []
@@ -76,7 +76,7 @@ class App(QWidget):
 		self.dataout = [1,1,1,1,1,1,1,1] 
 		self.datafiltered = [1,1,1,1,1,1,1,1] 
 		self.first = 100
-		self.ser = serial.Serial('COM10',timeout=5)
+		self.ser = serial.Serial('COM4',timeout=5)
 		self.ser.baudrate = 57600
 		self.pressed = 0
 		self.left = 0
@@ -316,7 +316,7 @@ class App(QWidget):
 					# print(ypositions)
 					# print(intensities)
 
-					self.WLS.fit(numpy.asarray(xpositions), numpy.asarray(ypositions), sample_weight=intensities)
+					# self.WLS.fit(numpy.asarray(xpositions), numpy.asarray(ypositions), sample_weight=intensities)
 
 					self.centerPressure = Cell(int(self.point[0]),int(self.point[1]),sum(numpy.square(self.datafiltered))/1000)
 
@@ -456,9 +456,9 @@ class App(QWidget):
 
 		qp = QPainter(self)
 		qp.setPen(QPen(Qt.green, 1, Qt.SolidLine))
-		slope = (self.WLS.coef_[0])
+		# slope = (self.WLS.coef_[0])
 		#print(slope[0])
-		qp.drawLine(self.centerPressure.i*WIDTH, self.centerPressure.j*WIDTH  , self.centerPressure.i*WIDTH + 200, self.centerPressure.j*WIDTH + int(200*slope[0]))
+		# qp.drawLine(self.centerPressure.i*WIDTH, self.centerPressure.j*WIDTH  , self.centerPressure.i*WIDTH + 200, self.centerPressure.j*WIDTH + int(200*slope[0]))
 
 
 
