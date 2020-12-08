@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 from numpy import sin, linspace, pi
 from pylab import plot, show, title, xlabel, ylabel, subplot
 from pynput import keyboard
+from scipy.optimize import curve_fit
+import pylab
 
 
 global state
@@ -36,7 +38,7 @@ timenow = 0
 lasttime = 0
 hz = 0
 
-ser = serial.Serial('COM5',timeout=5)
+ser = serial.Serial('COM7',timeout=5)
 
 ser.baudrate = 57600	
 #ser.timeout = 0            # non blocking read	
@@ -49,7 +51,7 @@ fig2, ax2 = plt.subplots()
 count = 1
 dim1 = 31; dim2 = 12; dim3 = 8
 ax.axis([0,200,0,100000])
-ax2.axis([-2,dim1+1, -2, dim2+1])
+ax2.axis([-dim1/2-2,dim1/2+1, -dim2/2-2, dim2/2+1])
 
 plt.show(block=False)
 
@@ -85,14 +87,20 @@ pointlist_y = np.zeros(dim3*(dim3-1))
 
 for i in range (0,dim2):
 	for j in range (0,dim1):
-		xlist[i*dim1 +j] = j
-		ylist[i*dim1 +j] = i
+		xlist[i*dim1 +j] = j-dim1/2
+		ylist[i*dim1 +j] = i-dim2/2
 
 CoG = [0,0]
+slope = 0
+slope2 = 0
+
 
 scatterpoint = ax2.scatter(xlist,ylist, marker="s",s=900) 
 linepoints = ax2.scatter(pointlist_x,pointlist_y)
 center = ax2.plot(CoG[0],CoG[1],'ro')[0]
+
+slopeline = ax2.plot((CoG[0] - 5*np.cos(np.arctan(slope)), CoG[0] + 5*np.cos(np.arctan(slope))), (CoG[1]-5*np.sin(np.arctan(slope)), CoG[1]+5*np.sin(np.arctan(slope))), color='r')[0]
+slopeline2 = ax2.plot((CoG[0] - 5*np.cos(np.arctan(slope2)), CoG[0] + 5*np.cos(np.arctan(slope2))), (CoG[1]-5*np.sin(np.arctan(slope2)), CoG[1]+5*np.sin(np.arctan(slope2))), color='y')[0]
 
 
 ax2.set_aspect('equal')
@@ -111,7 +119,6 @@ while(1):
 		hz = 1/(timenow - lasttime)
 
 	lasttime = timenow
-	# print(str(hz) + " Hz")
 
 	while(ser.read() != b':'):
 		pass
@@ -133,7 +140,6 @@ while(1):
 
 	dataarray = np.array(data.copy()).reshape((1,8))
 	datamem = np.append(datamem, dataarray, axis=0)
-	#print(np.size(datamem[:,0]))
 
 
 	high = 0
@@ -146,7 +152,6 @@ while(1):
 		dataout = np.delete(dataout,0, 0)
 
 
-	# print(np.shape(np.append(dataout, dataarray - datamem[194,:].reshape((1,8)), axis=0)))
 	dataoutpoint = dataarray.copy()
 	if(state == 0):
 		dataoutpoint = dataarray - datamem[196,:].reshape((1,8))
@@ -161,9 +166,22 @@ while(1):
 	i = 0
 
 
-	# print(dataoutpoint[0])
 
 	datapoint = dataoutpoint[0]
+	# 	datapoint[6] = datapoint[6]*2	
+
+	# # Correctning
+	# minimum = 1000000
+	# for d in datapoint:
+	# 	if d < minimum:
+	# 		minimum = d
+
+	# for i in dim3:
+	# 	datapoint[i] = datapoint[i] - minimum
+
+
+	
+
 	ratios = np.zeros(8)
 	matchs = np.zeros((dim1,dim2))
 	averageMatch = 0
@@ -218,13 +236,12 @@ while(1):
 	ax.axis([0,200,min(-700,np.amin(dataout)-500),max(700, np.amax(dataout)+500)])
 	
 	colors = []
-	points = [[-1/2,1/2],[-1/4,1/2],[1/4,1/2],[1/2,1/2],[1/2,-1/2],[1/4,-1/2],[-1/4,-1/2],[-1/2,-1/2 ]]
+	points = [[-1/2,1/2],[-1/6,1/2],[1/6,1/2],[1/2,1/2],[1/2,-1/2],[1/6,-1/2],[-1/6,-1/2],[-1/2,-1/2 ]]
 
 	for k in range (0,8):
-		points[k][0] = (points[k][0]+1/2)*dim1
-		points[k][1] = (points[k][1]+1/2)*dim2
+		points[k][0] = (points[k][0])*dim1
+		points[k][1] = (points[k][1])*dim2
 
-	# print(points)
 
 	leftshift = 0
 	rightshift = 0
@@ -233,6 +250,7 @@ while(1):
 
 	xchords = []
 	ychords = []
+	weights = []
 	dotcolors = []
 	dotsizes = []
 
@@ -247,44 +265,76 @@ while(1):
 				kfactor1 = 0;
 				jfactor1 = 0;
 				
-				if(datapoint[k] > 0):
-					kfactor0 = points[k][0]*datapoint[k]
-					kfactor1 = points[k][1]*datapoint[k]
-				else:
-					kfactor0 = (dim1 - points[k][0])*abs(datapoint[k])
-					kfactor1 = (dim1 - points[k][1])*abs(datapoint[k])
+				kfactor0 = points[k][0]*datapoint[k]
+				kfactor1 = points[k][1]*datapoint[k]
+				jfactor0 = points[j][0]*datapoint[j]
+				jfactor1 = points[j][1]*datapoint[j]
+
+				weight = np.sqrt(abs(datapoint[k]) * abs(datapoint[j]))
 				
-				if(datapoint[j] > 0):
-					jfactor0 = points[j][0]*datapoint[j]
-					jfactor1 = points[j][1]*datapoint[j]
-				else:
-					jfactor0 = (dim2 - points[j][0])*abs(datapoint[j])
-					jfactor1 = (dim2 - points[j][1])*abs(datapoint[j])
-				xchord = (kfactor0 + jfactor0)/(abs(datapoint[k]) + abs(datapoint[j]))
-				ychord = (kfactor1 + jfactor1)/(abs(datapoint[k]) + abs(datapoint[j]))
-				dotcolor = (0,max(0, min(1, (abs(datapoint[j]) + abs(datapoint[k]))/ (4*average))),0)
+				xchord = max(-dim1/2,min(dim1/2,(kfactor0 + jfactor0)/(abs(datapoint[k]) + abs(datapoint[j]))))
+				ychord = max(-dim2/2,min(dim2/2,(kfactor1 + jfactor1)/(abs(datapoint[k]) + abs(datapoint[j]))))
+				dotcolor = (0,max(0, min(1, (weight)/ (4*average))),0)
 				dotsize = max(0,(datapoint[j] + datapoint[k])/np.sqrt(average))
-				CoG[0] = CoG[0] + xchord * (abs(datapoint[k]) + abs(datapoint[j]))**2
-				CoG[1] = CoG[1] + ychord * (abs(datapoint[k]) + abs(datapoint[j]))**2
-				total_mass = total_mass +  (abs(datapoint[k]) + abs(datapoint[j]))**2
+				if(datapoint[j] + datapoint[k] > 0):
+					CoG[0] = CoG[0] + xchord * weight
+					CoG[1] = CoG[1] + ychord * weight
+					total_mass = total_mass +  weight
 
 
 
-				xchords.append(xchord)
+				xchords.append(xchord)      
 				ychords.append(ychord)
 				dotcolors.append(dotcolor)
 				dotsizes.append(dotsize)
+				weights.append(weight)
 
 
-	
-	# print(xchords)
-	# print(ychords)
-	print(CoG)
+
 
 	if(total_mass):
 		CoG[0] = CoG[0] / total_mass
 		CoG[1] = CoG[1] / total_mass
 
+
+
+
+
+	for i in range (0,(dim3*(dim3-1))):
+		pass
+		gravity = min(0.9,(np.sqrt(np.sqrt(abs(total_mass))/(dotsizes[i]**2*4*abs(xchords[i]-CoG[0])))**2 + np.sqrt(abs(total_mass))/(dotsizes[i]**2*4*abs(ychords[i]-CoG[1]))**2))
+
+		xchords[i] = xchords[i] = xchords[i] - (xchords[i] - CoG[0])*gravity
+		ychords[i] = ychords[i] = ychords[i] - (ychords[i] - CoG[1])*gravity
+	
+
+	xdiffs = 0
+	square_xdiffs = 0
+	square_ydiffs = 0
+	ydiffs = 0
+	x_ydiffs = 0
+	for i in range (0,(dim3*(dim3-1))):
+		xdiff = (xchords[i]-CoG[0])*weights[i]
+		ydiff = (ychords[i]-CoG[1])*weights[i]
+		xdiffs = xdiffs + xdiff
+		ydiffs = ydiffs = ydiff
+		square_xdiffs = square_xdiffs + xdiff**2
+		square_ydiffs = square_ydiffs + ydiff**2
+
+		x_ydiffs = x_ydiffs + xdiff*ydiff
+
+	# print(square_xdiffs/x_ydiffs)
+	slope = square_xdiffs/x_ydiffs
+	slope2 = square_ydiffs/x_ydiffs
+	xvar = square_xdiffs/total_mass
+	yvar = square_ydiffs/total_mass
+	xvar_normal = xvar / 1000000
+	yvar_normal = yvar / 1000000
+
+
+	print(" ")
+	print(xvar)
+	print(yvar)
 
 
 	if (state == 1):
@@ -310,8 +360,11 @@ while(1):
 	linepoints.set_sizes(dotsizes)
 	center.set_xdata(CoG[0])
 	center.set_ydata(CoG[1])
+	slopeline.set_xdata((CoG[0] - xvar_normal*10*np.cos(np.arctan(slope)+3.1415/2), CoG[0] + xvar_normal*10*np.cos(np.arctan(slope)+3.1415/2)))
+	slopeline.set_ydata((CoG[1] - xvar_normal*10*np.sin(np.arctan(slope)+3.1415/2), CoG[1] + xvar_normal*10*np.sin(np.arctan(slope)+3.1415/2)))
 
-	print(CoG)
+	slopeline2.set_xdata((CoG[0] - yvar_normal*10*np.cos(np.arctan(slope2)), CoG[0] + yvar_normal*10*np.cos(np.arctan(slope2))))
+	slopeline2.set_ydata((CoG[1] - yvar_normal*10*np.sin(np.arctan(slope2)), CoG[1] + yvar_normal*10*np.sin(np.arctan(slope2))))
 
 
 	fig.canvas.draw()

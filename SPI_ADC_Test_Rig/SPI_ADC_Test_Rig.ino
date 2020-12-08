@@ -148,7 +148,7 @@ void loop()
 
   
 //  while(millis() > 30000){} 
-  if(micros() - 50000 > timer){
+  if(micros() - 5000 > timer){
     timer = micros();
     
 

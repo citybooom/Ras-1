@@ -34,12 +34,12 @@ long tempdata3 = 0;
 double j;
 long timer = 0;
 int buffercounter = 0;
-int chargingtimer = 100;
+int chargingtimer = 10000;
 
 
 byte res = 0;
 int first = 1;
-double EMA_a = 0.0001;    //initialization of EMA alpha
+double EMA_a = 0.01;    //initialization of EMA alpha
 long EMA_S = 0;        //initialization of EMA S
 long highpass = 0;
 
